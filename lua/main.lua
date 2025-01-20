@@ -32,7 +32,13 @@ function love.load()
     loadLevel("Level0.png", {
         {x = 150, y = 593, width = 990, height = 10, type = "Rigidbody"},
         {x = 150, y = 529, width = 825, height = 14, type = "Rigidbody"},
-        {x = 400, y = 250, width = 120, height = 20, type = "Rigidbody"},
+        {x = 150, y = 0, width = 10, height = 640, type = "Rigidbody"},
+        {x = 1120, y = 0, width = 10, height = 640, type = "Rigidbody"},
+        {x = 150, y = 466, width = 123, height = 14, type = "Rigidbody"},
+        {x = 304, y = 466, width = 223, height = 14, type = "Rigidbody"},
+        {x = 498, y = 433, width = 30, height = 40, type = "Rigidbody"},
+        {x = 545, y = 402, width = 60, height = 77, type = "Rigidbody"},
+        {x = 657, y = 370, width = 93, height = 109, type = "Rigidbody"}
     })
 
     -- Define animations
@@ -74,17 +80,31 @@ function resolveCollisions()
 
     for _, platform in ipairs(level.platforms) do
         if platform.type == "Rigidbody" and checkCollision(player.collider, platform) then
-            -- Landing on top of the platform
-            if player.yVelocity > 0 and player.collider.y + player.collider.height <= platform.y + platform.height / 2 then
+            -- Calculate overlaps
+            local overlapTop = (player.collider.y + player.collider.height) - platform.y
+            local overlapBottom = platform.y + platform.height - player.collider.y
+            local overlapLeft = (player.collider.x + player.collider.width) - platform.x
+            local overlapRight = platform.x + platform.width - player.collider.x
+
+            -- Determine the smallest overlap
+            local smallestOverlap = math.min(overlapTop, overlapBottom, overlapLeft, overlapRight)
+
+            -- Resolve collision based on direction
+            if smallestOverlap == overlapTop and player.yVelocity > 0 then
+                -- Colliding from above
                 player.y = platform.y - player.height
                 player.yVelocity = 0
                 player.isOnGround = true
-                print("Landed on platform at:", platform.x, platform.y)
-            -- Hitting the platform from below
-            elseif player.yVelocity < 0 and player.collider.y >= platform.y + platform.height / 2 then
+            elseif smallestOverlap == overlapBottom and player.yVelocity < 0 then
+                -- Colliding from below
                 player.y = platform.y + platform.height
                 player.yVelocity = 0
-                print("Hit head on platform at:", platform.x, platform.y)
+            elseif smallestOverlap == overlapLeft then
+                -- Colliding from the left
+                player.x = platform.x - player.width
+            elseif smallestOverlap == overlapRight then
+                -- Colliding from the right
+                player.x = platform.x + platform.width
             end
         end
     end
@@ -105,8 +125,12 @@ function love.update(dt)
     player.y = player.y + player.yVelocity * dt
 
     -- Sync collider with player position
-    player.collider.x = player.x
-    player.collider.y = player.y
+    player.collider = {
+        x = player.x,
+        y = player.y,
+        width = player.width,
+        height = player.height
+    }
 
     -- Resolve collisions
     resolveCollisions()
