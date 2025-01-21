@@ -38,7 +38,21 @@ function love.load()
         {x = 304, y = 466, width = 223, height = 14, type = "Rigidbody"},
         {x = 498, y = 433, width = 30, height = 40, type = "Rigidbody"},
         {x = 545, y = 402, width = 60, height = 77, type = "Rigidbody"},
-        {x = 657, y = 370, width = 93, height = 109, type = "Rigidbody"}
+        {x = 657, y = 370, width = 93, height = 109, type = "Rigidbody"},
+        {x = 747, y = 370, width = 450, height = 14, type = "Rigidbody"},
+        {x = 657, y = 275, width = 31, height = 14, type = "Rigidbody"},
+        {x = 447, y = 275, width = 81, height = 14, type = "Rigidbody"},
+        {x = 769, y = 275, width = 13, height = 14, type = "Rigidbody"},
+        {x = 863, y = 275, width = 31, height = 14, type = "Rigidbody"},
+        {x = 943, y = 275, width = 31, height = 14, type = "Rigidbody"},
+        {x = 594, y = 259, width = 13, height = 14, type = "Rigidbody"},
+        {x = 992, y = 306, width = 81, height = 14, type = "Rigidbody"},
+        {x = 481, y = 178, width = 13, height = 14, type = "Rigidbody"},
+        {x = 481, y = 66, width = 13, height = 14, type = "Rigidbody"},
+        {x = 498, y = 83, width = 13, height = 14, type = "Rigidbody"},
+        {x = 514, y = 128, width = 13, height = 14, type = "Rigidbody"},
+        {x = 528, y = 162, width = 13, height = 14, type = "Rigidbody"},
+        {x = 545, y = 145, width = 13, height = 14, type = "Rigidbody"},
     })
 
     -- Define animations
@@ -63,7 +77,7 @@ function love.load()
         height = player.height
     }
 
-    love.graphics.setBackgroundColor(0.2, 0.2, 0.2) -- Set background to dark gray
+    love.graphics.setBackgroundColor(0.2, 0.6, 1, 0.4) -- Set background to dark gray
 end
 
 -- Check for collisions between the player and platforms
