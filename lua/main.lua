@@ -185,6 +185,7 @@ function loadLevel1()
         {x = 545, y = 145, width = 13, height = 14, type = "Rigidbody"},
         {x = 545, y = 98, width = 13, height = 14, type = "Rigidbody"},
         {x = 545, y = 34, width = 13, height = 14, type = "Rigidbody"}, -- Ends
+        {x = 545, y = 15, width = 13, height = 14, type = "Goal0"},
         {x = 465, y = 48, width = 13, height = 14, type = "Rigidbody"},
         {x = 416, y = 178, width = 13, height = 14, type = "Rigidbody"},
         {x = 369, y = 178, width = 13, height = 14, type = "Rigidbody"},
