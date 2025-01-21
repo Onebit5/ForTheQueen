@@ -24,6 +24,11 @@ local level = {
     platforms = {}, -- List of platform collision boxes
 }
 
+local timerStarted = false -- Timer starts as inactive
+local levelComplete = false -- Tracks if the level has already been completed
+local levelTime = nil -- Total time for the level in seconds
+local timeLeft = nil -- Time remaining
+
 -- Function to load resources
 function love.load()
     -- Load the sprite sheet
@@ -53,6 +58,19 @@ function love.load()
         {x = 514, y = 128, width = 13, height = 14, type = "Rigidbody"},
         {x = 528, y = 162, width = 13, height = 14, type = "Rigidbody"},
         {x = 545, y = 145, width = 13, height = 14, type = "Rigidbody"},
+        {x = 545, y = 98, width = 13, height = 14, type = "Rigidbody"},
+        {x = 545, y = 34, width = 13, height = 14, type = "Rigidbody"}, -- Ends
+        {x = 545, y = 15, width = 13, height = 14, type = "Goal0"},
+        {x = 512, y = 34, width = 13, height = 14, type = "Rigidbody"},
+        {x = 465, y = 48, width = 13, height = 14, type = "Rigidbody"},
+        {x = 416, y = 178, width = 13, height = 14, type = "Rigidbody"},
+        {x = 369, y = 178, width = 13, height = 14, type = "Rigidbody"},
+        {x = 339, y = 178, width = 13, height = 14, type = "Rigidbody"},
+        {x = 339, y = 226, width = 13, height = 14, type = "Rigidbody"},
+        {x = 354, y = 242, width = 13, height = 14, type = "Rigidbody"},
+        {x = 369, y = 258, width = 13, height = 14, type = "Rigidbody"},
+        {x = 323, y = 211, width = 13, height = 14, type = "Rigidbody"},
+        {x = 289, y = 194, width = 13, height = 14, type = "Rigidbody"},
     })
 
     -- Define animations
@@ -120,14 +138,72 @@ function resolveCollisions()
                 -- Colliding from the right
                 player.x = platform.x + platform.width
             end
+            elseif platform.type == "Goal0" then
+            if not levelComplete and checkCollision(player.collider, platform) then
+                levelComplete = true -- Mark the level as completed
+                loadLevel1()
+            end
         end
     end
 end
 
--- Load the level
+-- Load level 0
 function loadLevel(imagePath, platforms)
     level.image = love.graphics.newImage(imagePath)
     level.platforms = platforms
+    levelTime = 10
+    timeLeft = levelTime
+end
+
+-- Load level 1
+function loadLevel1()
+    levelComplete = false -- Reset the flag for the new level
+
+    loadLevel("Level0.png", {
+        {x = 150, y = 593, width = 990, height = 10, type = "Rigidbody"},
+        {x = 150, y = 529, width = 825, height = 14, type = "Rigidbody"},
+        {x = 150, y = 0, width = 10, height = 640, type = "Rigidbody"},
+        {x = 1120, y = 0, width = 10, height = 640, type = "Rigidbody"},
+        {x = 150, y = 466, width = 123, height = 14, type = "Rigidbody"},
+        {x = 304, y = 466, width = 223, height = 14, type = "Rigidbody"},
+        {x = 498, y = 433, width = 30, height = 40, type = "Rigidbody"},
+        {x = 545, y = 402, width = 60, height = 77, type = "Rigidbody"},
+        {x = 657, y = 370, width = 93, height = 109, type = "Rigidbody"},
+        {x = 747, y = 370, width = 450, height = 14, type = "Rigidbody"},
+        {x = 657, y = 275, width = 31, height = 14, type = "Rigidbody"},
+        {x = 447, y = 275, width = 81, height = 14, type = "Rigidbody"},
+        {x = 769, y = 275, width = 13, height = 14, type = "Rigidbody"},
+        {x = 863, y = 275, width = 31, height = 14, type = "Rigidbody"},
+        {x = 943, y = 275, width = 31, height = 14, type = "Rigidbody"},
+        {x = 594, y = 259, width = 13, height = 14, type = "Rigidbody"},
+        {x = 992, y = 306, width = 81, height = 14, type = "Rigidbody"},
+        {x = 481, y = 178, width = 13, height = 14, type = "Rigidbody"},
+        {x = 481, y = 66, width = 13, height = 14, type = "Rigidbody"},
+        {x = 498, y = 83, width = 13, height = 14, type = "Rigidbody"},
+        {x = 514, y = 128, width = 13, height = 14, type = "Rigidbody"},
+        {x = 528, y = 162, width = 13, height = 14, type = "Rigidbody"},
+        {x = 545, y = 145, width = 13, height = 14, type = "Rigidbody"},
+        {x = 545, y = 98, width = 13, height = 14, type = "Rigidbody"},
+        {x = 545, y = 34, width = 13, height = 14, type = "Rigidbody"}, -- Ends
+        {x = 465, y = 48, width = 13, height = 14, type = "Rigidbody"},
+        {x = 416, y = 178, width = 13, height = 14, type = "Rigidbody"},
+        {x = 369, y = 178, width = 13, height = 14, type = "Rigidbody"},
+        {x = 339, y = 178, width = 13, height = 14, type = "Rigidbody"},
+        {x = 339, y = 226, width = 13, height = 14, type = "Rigidbody"},
+        {x = 354, y = 242, width = 13, height = 14, type = "Rigidbody"},
+        {x = 369, y = 258, width = 13, height = 14, type = "Rigidbody"},
+        {x = 323, y = 211, width = 13, height = 14, type = "Rigidbody"},
+        {x = 289, y = 194, width = 13, height = 14, type = "Rigidbody"},
+    })
+
+    -- Player pos for the new level
+    player.x = 162 
+    player.y = 572 
+
+    -- Reset timer
+    levelTime = 120
+    timeLeft = levelTime
+    timerStarted = false
 end
 
 -- Update game logic
@@ -154,10 +230,12 @@ function love.update(dt)
         player.x = player.x + player.speed * dt
         player.state = "running"
         player.direction = "right"
+        timerStarted = true
     elseif love.keyboard.isDown("left") then
         player.x = player.x - player.speed * dt
         player.state = "running"
         player.direction = "left"
+        timerStarted = true
     else
         player.state = "idle"
     end
@@ -172,6 +250,15 @@ function love.update(dt)
     else
         player.currentFrame = 1
     end
+
+    -- Update Timer
+    -- Update timer only if it has started
+    if timerStarted then
+    timeLeft = math.max(0, timeLeft - dt) -- Decrease timer but prevent negative values
+        if timeLeft == 0 then
+            resetLevel()
+        end
+    end
 end
 
 -- Handle key presses
@@ -179,6 +266,9 @@ function love.keypressed(key)
     if key == "space" and player.isOnGround then
         player.yVelocity = player.jumpHeight -- Apply jump force
         player.isOnGround = false
+        timerStarted = true
+    elseif key == "r" then
+        resetLevel() -- Reset the level
     end
 end
 
@@ -206,4 +296,34 @@ function love.draw()
     -- Debug: Draw player collider
     love.graphics.setColor(0, 0, 1, 0.5)
     love.graphics.rectangle("fill", player.collider.x, player.collider.y, player.collider.width, player.collider.height)
+
+    -- Time bar
+    local sliderX, sliderY, sliderWidth, sliderHeight = 165, 50, 200, 20
+    local progress = timeLeft / levelTime -- Calculate progress
+
+    -- Draw background bar
+    love.graphics.setColor(0.5, 0.5, 0.5)
+    love.graphics.rectangle("fill", sliderX, sliderY, sliderWidth, sliderHeight)
+
+    -- Draw progress bar
+    love.graphics.setColor(0.2, 0.8, 0.2)
+    love.graphics.rectangle("fill", sliderX, sliderY, sliderWidth * progress, sliderHeight)
+
+    -- Draw remaining seconds
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("Time left: " .. math.ceil(timeLeft) .. "s", sliderX, sliderY + sliderHeight + 10)
+end
+
+function resetLevel()
+    -- Reset player variables
+    player.x = 162 -- Initial X position
+    player.y = 572 -- Initial Y position
+    player.yVelocity = 0
+    player.isOnGround = false
+    player.state = "idle"
+    player.direction = "right"
+    player.currentFrame = 1
+
+    -- Reset timer
+    timeLeft = levelTime 
 end
