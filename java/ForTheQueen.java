@@ -14,8 +14,8 @@ public class ForTheQueen extends JPanel implements KeyListener {
 
     private int playerX = 100; // Initial X position of the player
     private int playerY = 300; // Initial Y position of the player
-    private final int PLAYER_WIDTH = 50;
-    private final int PLAYER_HEIGHT = 50;
+    private final int PLAYER_WIDTH = 13;
+    private final int PLAYER_HEIGHT = 19;
     private final int MOVE_SPEED = 20;
 
     private float verticalVelocity = 0; // Vertical velocity for jumping
@@ -26,6 +26,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private boolean isJumping = false; // Boolean to know if the player is jumping or not
     private boolean isMovingLeft = false;
     private boolean isMovingRight = false;
+    private boolean facingLeft = false;
 
     // A set to track which keys are currently pressed
     private final Set<Integer> keysPressed = new HashSet<>();
@@ -35,7 +36,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private BufferedImage[] idleFrames;
     private BufferedImage[] runningFrames;
     private int animationFrame = 0; // Current frame of animation
-    private int animationSpeed = 0; // Lower = faster animation
+    private int animationSpeed = 10; // Lower = faster animation
     private int animationCounter = 0; // Timer for switching frames
 
     public ForTheQueen() {
@@ -52,8 +53,8 @@ public class ForTheQueen extends JPanel implements KeyListener {
         }
 
         // Extract frames from the sprite sheet
-        idleFrames = extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation (row 0, 4 frames)
-        runningFrames = extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation (row 1, 6 frames)
+        idleFrames = extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation (row 0, 1 frame)
+        runningFrames = extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation (row 1, 3 frames)
 
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
@@ -65,6 +66,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
         if (keysPressed.contains(KeyEvent.VK_LEFT)) {
             playerX -= MOVE_SPEED;
             isMovingLeft = true;
+            facingLeft = true;
         } else {
             isMovingLeft = false;
         }
@@ -72,6 +74,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
         if (keysPressed.contains(KeyEvent.VK_RIGHT)) {
             playerX += MOVE_SPEED;
             isMovingRight = true;
+            facingLeft = false;
         } else {
             isMovingRight = false;
         }
@@ -100,21 +103,10 @@ public class ForTheQueen extends JPanel implements KeyListener {
     }
 
     private BufferedImage[] extractFrames(BufferedImage spriteSheet, int row, int frameCount, int frameWidth, int frameHeight) {
-        int sheetWidth = spriteSheet.getWidth();
-        int sheetHeight = spriteSheet.getHeight();
-
-        System.out.println("Sprite Sheet Dimensions: " + sheetWidth + "x" + sheetHeight);
-        System.out.println("Row: " + row + ", Frame Count: " + frameCount + ", Frame Width: " + frameWidth + ", Frame Height: " + frameHeight);
-
         BufferedImage[] frames = new BufferedImage[frameCount];
         for (int i = 0; i < frameCount; i++) {
             int x = i * frameWidth; // X position of the frame
             int y = row * frameHeight; // Y position of the frame
-
-            // Validate bounds
-            if (x + frameWidth > sheetWidth || y + frameHeight > sheetHeight) {
-                throw new IllegalArgumentException("Frame is out of sprite sheet bounds: x=" + x + ", y=" + y);
-            }
 
             frames[i] = spriteSheet.getSubimage(x, y, frameWidth, frameHeight);
         }
@@ -143,8 +135,19 @@ public class ForTheQueen extends JPanel implements KeyListener {
         g.fillRect(0, FLOOR_Y + PLAYER_HEIGHT, getWidth(), getWidth() - FLOOR_Y);
 
         // Draw the player sprite
+        // Get the current animation frame
         BufferedImage currentFrame = getCurrentAnimationFrames()[animationFrame];
-        g.drawImage(currentFrame, playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT, null);
+
+        // Determine if the sprite should be flipped
+        boolean flipHorizontally = (isMovingLeft || facingLeft);
+
+        // Draw the player sprite
+        Graphics2D g2d = (Graphics2D) g;
+        if (flipHorizontally) {
+            g2d.drawImage(currentFrame, playerX + PLAYER_WIDTH, playerY, -PLAYER_WIDTH, PLAYER_HEIGHT, null);
+        } else {
+            g2d.drawImage(currentFrame, playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT, null);
+        }
     }
 
     @Override
