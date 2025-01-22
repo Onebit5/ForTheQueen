@@ -53,8 +53,8 @@ public class ForTheQueen extends JPanel implements KeyListener {
         }
 
         // Extract frames from the sprite sheet
-        idleFrames = extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation (row 0, 1 frame)
-        runningFrames = extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation (row 1, 3 frames)
+        idleFrames = extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation (row 0, 1 frame, x res, y res)
+        runningFrames = extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation (row 1, 3 frames, x res, y res)
 
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
