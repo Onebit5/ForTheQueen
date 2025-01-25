@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.RasterFormatException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -53,9 +52,9 @@ public class ForTheQueen extends JPanel implements KeyListener {
             System.exit(1);
         }
 
-        // Extract frames from the sprite sheet
-        idleFrames = extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation (row 0, 1 frame, x res, y res)
-        runningFrames = extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation (row 1, 3 frames, x res, y res)
+        // Extract frames using levelManager
+        idleFrames = (BufferedImage[]) levelManager.extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation
+        runningFrames = (BufferedImage[]) levelManager.extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation
 
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
@@ -110,20 +109,6 @@ public class ForTheQueen extends JPanel implements KeyListener {
         repaint();
     }
 
-    private BufferedImage[] extractFrames(BufferedImage spriteSheet, int row, int frameCount, int frameWidth, int frameHeight) {
-        BufferedImage[] frames = new BufferedImage[frameCount];
-        for (int i = 0; i < frameCount; i++) {
-            try {
-                frames[i] = spriteSheet.getSubimage(i * frameWidth, row * frameHeight, frameWidth, frameHeight);
-            } catch (RasterFormatException | ArrayIndexOutOfBoundsException e) {
-                System.err.println("Error extracting frame " + i + " from row " + row);
-                e.printStackTrace();
-                frames[i] = null; // Fill with null to prevent crashes
-            }
-        }
-        return frames;
-    }
-
     private BufferedImage[] getCurrentAnimationFrames() {
         if (isJumping) {
             if (isMovingLeft || isMovingRight) {
@@ -152,13 +137,11 @@ public class ForTheQueen extends JPanel implements KeyListener {
         g.fillRect(0, FLOOR_Y + PLAYER_HEIGHT, getWidth(), getWidth() - FLOOR_Y);
 
         // Draw the player sprite
-        // Get the current animation frame
         BufferedImage currentFrame = getCurrentAnimationFrames()[animationFrame];
         BufferedImage[] currentFrames = getCurrentAnimationFrames();
 
-        // Ensure animationFrame is within the bounds
         if (animationFrame >= currentFrames.length) {
-            animationFrame = 0; // Reset to the first frame
+            animationFrame = 0;
         }
 
         g.drawImage(currentFrames[animationFrame], playerX, playerY, this);
@@ -166,7 +149,6 @@ public class ForTheQueen extends JPanel implements KeyListener {
         // Determine if the sprite should be flipped
         boolean flipHorizontally = (isMovingLeft || facingLeft);
 
-        // Draw the player sprite
         Graphics2D g2d = (Graphics2D) g;
         if (flipHorizontally) {
             g2d.drawImage(currentFrame, playerX + PLAYER_WIDTH, playerY, -PLAYER_WIDTH, PLAYER_HEIGHT, null);
@@ -178,36 +160,31 @@ public class ForTheQueen extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-        keysPressed.add(key); // Add the pressed key to the set
+        keysPressed.add(key);
 
-        // Jump
         if (key == KeyEvent.VK_SPACE && !isJumping) {
-            verticalVelocity = JUMP_STRENGTH; // Apply upward velocity
-            isJumping = true; // Prevent double jumps
+            verticalVelocity = JUMP_STRENGTH;
+            isJumping = true;
         }
 
-        // Repaint to update the screen
         repaint();
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
-        keysPressed.remove(key); // Remove the released key from the set
+        keysPressed.remove(key);
 
-        // Stop movement if LEFT or RIGHT key is released
         if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) {
             isMovingLeft = false;
             isMovingRight = false;
         }
 
-        // Repaint to update the screen
         repaint();
     }
 
     @Override
     public void keyTyped(KeyEvent e) {
-        // Not used but required 
     }
 
     public static void main(String[] args) {

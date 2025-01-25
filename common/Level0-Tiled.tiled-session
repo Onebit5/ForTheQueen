@@ -1,0 +1,60 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "Level0.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "Level0.json": {
+            "scale": 0.8839453125,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 639.7454593662999,
+                "y": 359.75076229616866
+            }
+        },
+        "Level0.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 761.5,
+                "y": 292
+            }
+        },
+        "Level0.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 4
+        },
+        "Tiles.tsx": {
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        }
+    },
+    "last.exportedFilePath": "D:/Work/Projects/For The Queen!/common",
+    "last.imagePath": "D:/Work/Projects/For The Queen!/common/sprites",
+    "map.height": 45,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 80,
+    "openFiles": [
+        "Tiles.tsx",
+        "Level0.tmx"
+    ],
+    "project": "Level0-Tiled.tiled-project",
+    "recentFiles": [
+        "Tiles.tsx",
+        "Level0.tmx",
+        "Level0.json",
+        "Level0.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
