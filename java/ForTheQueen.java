@@ -14,7 +14,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
 
     private levelManager lvlManager;
 
-    private int playerX = 100; // Initial X position of the player
+    private int playerX = 200; // Initial X position of the player
     private int playerY = 300; // Initial Y position of the player
     private final int PLAYER_WIDTH = 13;
     private final int PLAYER_HEIGHT = 19;
@@ -69,9 +69,15 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private void gameLoop() {
         BufferedImage[] currentFrames = getCurrentAnimationFrames();
 
+        // Create a rectangle representing the player's current position
+        Rectangle playerRect = new Rectangle(playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT);
+
         // Handle horizontal movement
         if (keysPressed.contains(KeyEvent.VK_LEFT)) {
-            playerX -= MOVE_SPEED;
+            playerRect.x -= MOVE_SPEED; // Test moving left
+            if (!lvlManager.checkCollision(playerRect)) {
+                playerX -= MOVE_SPEED; // Apply movement if no collider
+            }
             isMovingLeft = true;
             facingLeft = true;
         } else {
@@ -79,17 +85,28 @@ public class ForTheQueen extends JPanel implements KeyListener {
         }
 
         if (keysPressed.contains(KeyEvent.VK_RIGHT)) {
-            playerX += MOVE_SPEED;
+            playerRect.x += MOVE_SPEED; // Test moving right
+            if (!lvlManager.checkCollision(playerRect)) {
+                playerX += MOVE_SPEED; // Apply movement if no collider
+            }
             isMovingRight = true;
             facingLeft = false;
         } else {
             isMovingRight = false;
         }
 
+        // Apply gravity and vertical movement
+        playerRect.y += verticalVelocity; // Test vertical movement
+        if (!lvlManager.checkCollision(playerRect)) {
+            playerY += verticalVelocity; // Apply vertical movement if no collision
+        } else {
+            verticalVelocity = 0; // Stop vertical movement on collision
+            isJumping = false; // Reset jumping state if landing
+        }
+
         // Apply gravity if the player is above the floor
         if (playerY < FLOOR_Y || verticalVelocity < 0) {
             verticalVelocity += GRAVITY;
-            playerY += verticalVelocity;
         }
 
         // Ensure the player doesn't fall through the floor

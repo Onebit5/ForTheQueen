@@ -117,10 +117,11 @@ public class levelManager {
             }
         }
 
-        g.setColor(new Color(255, 0, 0, 100));
+        // Uncoment to show the map collisions
+        /* g.setColor(new Color(255, 0, 0, 10));
         for (Rectangle box : collisionBoxes) {
             g.fillRect(box.x, box.y, box.width, box.height);
-        }
+        }*/
     }
 
     // Check collision with player
