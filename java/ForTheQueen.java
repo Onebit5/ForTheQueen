@@ -56,6 +56,9 @@ public class ForTheQueen extends JPanel implements KeyListener {
         idleFrames = (BufferedImage[]) levelManager.extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation
         runningFrames = (BufferedImage[]) levelManager.extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation
 
+        // Load the level
+        levelManager = new LevelManager("path/to/map.json", "path/to/tileset.png");
+
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
         timer.start();
@@ -193,6 +196,8 @@ public class ForTheQueen extends JPanel implements KeyListener {
     public static void main(String[] args) {
         JFrame frame = new JFrame("For The Queen");
         ForTheQueen game = new ForTheQueen();
+
+        levelManager levelManager = new levelManager();
 
         frame.add(game);
         frame.pack();
