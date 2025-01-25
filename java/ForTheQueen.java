@@ -59,7 +59,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
         runningFrames = levelManager.extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation
 
         // Load the level
-        lvlManager = new levelManager("level0.json", "../common/sprites/world_tileset.png");
+        lvlManager = new levelManager("Level0.json", "../common/sprites/world_tileset.png");
 
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
@@ -148,6 +148,8 @@ public class ForTheQueen extends JPanel implements KeyListener {
         if (animationFrame >= currentFrames.length) {
             animationFrame = 0; // Reset to the first frame
         }
+
+        lvlManager.render(g);
 
         g.drawImage(currentFrames[animationFrame], playerX, playerY, this);
 
