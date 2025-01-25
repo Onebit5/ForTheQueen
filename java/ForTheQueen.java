@@ -12,6 +12,8 @@ import javax.swing.*;
 
 public class ForTheQueen extends JPanel implements KeyListener {
 
+    private levelManager lvlManager;
+
     private int playerX = 100; // Initial X position of the player
     private int playerY = 300; // Initial Y position of the player
     private final int PLAYER_WIDTH = 13;
@@ -53,11 +55,11 @@ public class ForTheQueen extends JPanel implements KeyListener {
         }
 
         // Extract frames using levelManager
-        idleFrames = (BufferedImage[]) levelManager.extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation
-        runningFrames = (BufferedImage[]) levelManager.extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation
+        idleFrames = levelManager.extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation
+        runningFrames = levelManager.extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation
 
         // Load the level
-        levelManager = new LevelManager("path/to/map.json", "path/to/tileset.png");
+        lvlManager = new levelManager("level0.json", "../common/sprites/world_tileset.png");
 
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
@@ -196,8 +198,6 @@ public class ForTheQueen extends JPanel implements KeyListener {
     public static void main(String[] args) {
         JFrame frame = new JFrame("For The Queen");
         ForTheQueen game = new ForTheQueen();
-
-        levelManager levelManager = new levelManager();
 
         frame.add(game);
         frame.pack();
