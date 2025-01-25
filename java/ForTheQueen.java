@@ -141,7 +141,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
         BufferedImage[] currentFrames = getCurrentAnimationFrames();
 
         if (animationFrame >= currentFrames.length) {
-            animationFrame = 0;
+            animationFrame = 0; // Reset to the first frame
         }
 
         g.drawImage(currentFrames[animationFrame], playerX, playerY, this);
@@ -149,6 +149,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
         // Determine if the sprite should be flipped
         boolean flipHorizontally = (isMovingLeft || facingLeft);
 
+        // Draw player sprite
         Graphics2D g2d = (Graphics2D) g;
         if (flipHorizontally) {
             g2d.drawImage(currentFrame, playerX + PLAYER_WIDTH, playerY, -PLAYER_WIDTH, PLAYER_HEIGHT, null);
@@ -160,11 +161,11 @@ public class ForTheQueen extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-        keysPressed.add(key);
+        keysPressed.add(key); // Add the pressed key to the set
 
         if (key == KeyEvent.VK_SPACE && !isJumping) {
-            verticalVelocity = JUMP_STRENGTH;
-            isJumping = true;
+            verticalVelocity = JUMP_STRENGTH; // Apply upwards veloity
+            isJumping = true; // Prevents double jump
         }
 
         repaint();
@@ -173,8 +174,9 @@ public class ForTheQueen extends JPanel implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
-        keysPressed.remove(key);
+        keysPressed.remove(key); // Remove the released key from the set
 
+        // Stop movement if LEFT or RIGHT key is released
         if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) {
             isMovingLeft = false;
             isMovingRight = false;
@@ -185,6 +187,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
+        // Not used but required 
     }
 
     public static void main(String[] args) {
