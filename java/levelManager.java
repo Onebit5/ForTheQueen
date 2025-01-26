@@ -15,6 +15,12 @@ public class levelManager {
     private Image tilesetImage; // The tileset image
     private int tileWidth, tileHeight, mapWidth, mapHeight, tilesetColumns;
 
+    public enum CollisionType {
+        SOLID, // Fully blocks movement
+        STOP_HORIZONTAL, // Blocks horizontal movement only
+        NONE // No collision (empty space)
+    }
+
     public levelManager(String mapPath, String tilesetPath) {
         collisionBoxes = new ArrayList<>();
         loadMap(mapPath);
@@ -155,7 +161,7 @@ public class levelManager {
         return -1; // No matching ID
     }
 
-    public ForTheQueen.collisionType getCollisionType(Rectangle box) {
+    public CollisionType getCollisionType(Rectangle box) {
         for (int y = 0; y < mapHeight; y++) {
             for (int x = 0; x < mapWidth; x++) {
                 int tileId = map.getJSONArray("layers").getJSONObject(0).getJSONArray("data")
@@ -163,15 +169,15 @@ public class levelManager {
                 if (box.x == x * tileWidth && box.y == y * tileHeight) {
                     switch (tileId) {
                         case 1:
-                            return ForTheQueen.collisionType.SOLID; // Regular ground tile
+                            return CollisionType.SOLID; // Regular ground tile
                         case 17:
-                            return ForTheQueen.collisionType.STOP_HORIZONTAL; // Special tile
+                            return CollisionType.STOP_HORIZONTAL; // Special tile
                         default:
-                            return ForTheQueen.collisionType.NONE; // No collision
+                            return CollisionType.NONE; // No collision
                     }
                 }
             }
         }
-        return ForTheQueen.collisionType.NONE;
+        return CollisionType.NONE;
     }
 }

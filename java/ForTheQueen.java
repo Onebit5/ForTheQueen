@@ -12,13 +12,13 @@ import javax.swing.*;
 
 public class ForTheQueen extends JPanel implements KeyListener {
 
-    private levelManager lvlManager;
+    private final levelManager lvlManager;
 
     private int playerX = 200; // Initial X position of the player
-    private int playerY = 300; // Initial Y position of the player
+    private int playerY = 500; // Initial Y position of the player
     private final int PLAYER_WIDTH = 13;
     private final int PLAYER_HEIGHT = 19;
-    private final int MOVE_SPEED = 20;
+    private final int MOVE_SPEED = 13;
 
     private float verticalVelocity = 0; // Vertical velocity for jumping
     private final float GRAVITY = .5f; // Gravity pulling the player down
@@ -39,12 +39,6 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private int animationFrame = 0; // Current frame of animation
     private int animationSpeed = 10; // Lower = faster animation
     private int animationCounter = 0; // Timer for switching frames
-
-    public enum collisionType {
-        SOLID, // Fully blocks movement
-        STOP_HORIZONTAL, // Blocks horizontal movement only
-        NONE // No collision (empty space)
-    }
 
     public ForTheQueen() {
         this.setFocusable(true);
@@ -83,7 +77,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
             Rectangle collisionBox = lvlManager.checkCollision(playerRect);
 
             if (collisionBox != null) {
-                collisionType collisionType = lvlManager.getCollisionType(collisionBox);
+                levelManager.CollisionType collisionType = lvlManager.getCollisionType(collisionBox);
 
                 if (collisionType != collisionType.STOP_HORIZONTAL) {
                     playerX -= MOVE_SPEED; // Allow movement
@@ -102,7 +96,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
             Rectangle collisionBox = lvlManager.checkCollision(playerRect);
 
             if (collisionBox != null) {
-                collisionType collisionType = lvlManager.getCollisionType(collisionBox);
+                levelManager.CollisionType collisionType = lvlManager.getCollisionType(collisionBox);
 
                 if (collisionType != collisionType.STOP_HORIZONTAL) {
                     playerX += MOVE_SPEED; // Allow movement
@@ -122,7 +116,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
 
         Rectangle collisionBox = lvlManager.checkCollision(playerRect);
         if (collisionBox != null) {
-            collisionType collisionType = lvlManager.getCollisionType(collisionBox);
+            levelManager.CollisionType collisionType = lvlManager.getCollisionType(collisionBox);
 
             if (collisionType == collisionType.SOLID) {
                 if (verticalVelocity > 0) { // Falling onto the ground
@@ -149,7 +143,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
         if (keysPressed.contains(KeyEvent.VK_SPACE) && !isJumping) {
             playerRect.y += 1; // Check for ground below
             Rectangle groundBox = lvlManager.checkCollision(playerRect);
-            if (groundBox != null && lvlManager.getCollisionType(groundBox) == collisionType.SOLID) {
+            if (groundBox != null && lvlManager.getCollisionType(groundBox) == levelManager.CollisionType.SOLID) {
                 verticalVelocity = JUMP_STRENGTH; // Jump up
                 isJumping = true;
             }
