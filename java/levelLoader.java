@@ -6,7 +6,7 @@ public class levelLoader {
     private int currentLevel = 0; // Track the current level
     private ForTheQueen gameInstance; // Reference to the game instance
 
-    public void levelLoader(ForTheQueen gameInstance) {
+    public levelLoader(ForTheQueen gameInstance) { // Proper constructor
         this.gameInstance = gameInstance;
     }
 
@@ -14,6 +14,10 @@ public class levelLoader {
         currentLevel++;
         JOptionPane.showMessageDialog(null, "Level " + currentLevel + " loaded!");
 
-        gameInstance.loadNextLevel();
+        if (gameInstance != null) {
+            gameInstance.loadNextLevel(); // Call the method from ForTheQueen
+        } else {
+            System.err.println("Game instance is null. Cannot load next level.");
+        }
     }
 }

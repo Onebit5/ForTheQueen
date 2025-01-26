@@ -20,11 +20,11 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private int playerY = 500; // Initial Y position of the player
     private final int PLAYER_WIDTH = 13;
     private final int PLAYER_HEIGHT = 19;
-    private final int MOVE_SPEED = 13;
+    private int MOVE_SPEED = 13;
 
     private float verticalVelocity = 0; // Vertical velocity for jumping
     private final float GRAVITY = .5f; // Gravity pulling the player down
-    private final float JUMP_STRENGTH = -10; // Jump strength
+    private float JUMP_STRENGTH = -10; // Jump strength
 
     private boolean isJumping = false; // Boolean to know if the player is jumping or not
     private boolean isMovingLeft = false;
@@ -43,7 +43,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private int animationCounter = 0; // Timer for switching frames
 
     // Time variables
-    private int totalTime = 80; // Total time in seconds
+    private int totalTime = 10; // Total time in seconds
     private int timeLeft = totalTime; // Time left in seconds
     private JSlider timeSlider;
     private JLabel timeLabel;
@@ -76,10 +76,10 @@ public class ForTheQueen extends JPanel implements KeyListener {
         initUIComponents();
 
         // Collider to next level
-        colliderToNextLevel = new Rectangle(600, 100, 20, 20);
+        colliderToNextLevel = new Rectangle(1100, 92, 20, 20);
 
         // Initialize the level loader
-        levelLoader = new levelLoader();
+        levelLoader = new levelLoader(this);
 
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
@@ -344,6 +344,17 @@ public class ForTheQueen extends JPanel implements KeyListener {
         timeLeft = totalTime;
     }
 
+    // Reset input states
+    private void resetInputState(KeyEvent e) {
+        // Set to false all bools
+        isMovingLeft = false;
+        isMovingRight = false;
+        isJumping = false;
+
+        int key = e.getKeyCode();
+        keysPressed.remove(key);
+    }
+
     public void loadNextLevel() {
         // Load the level
         lvlManager = new levelManager("Level1.json", "../common/sprites/world_tileset.png");
@@ -353,6 +364,14 @@ public class ForTheQueen extends JPanel implements KeyListener {
 
         // Sets the new total time to complete the level
         totalTime = 20;
+        timeSlider.setMaximum(totalTime);
+        timeSlider.setValue(timeLeft);
+
+        // DO NOT REMOVE THIS, THIS ENSURE TO NOT SAVE THE MOVE SPEED/JUMP SPEED WHEN LOADS THE NEXT LEVEL
+        MOVE_SPEED = 0;
+        JUMP_STRENGTH = 0;
+        MOVE_SPEED = 13;
+        JUMP_STRENGTH = -10;
 
         // Resets level
         resetLevel();
