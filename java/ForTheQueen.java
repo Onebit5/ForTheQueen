@@ -79,12 +79,14 @@ public class ForTheQueen extends JPanel implements KeyListener {
             if (collisionBox != null) {
                 levelManager.CollisionType collisionType = lvlManager.getCollisionType(collisionBox);
 
-                if (collisionType != collisionType.STOP_HORIZONTAL) {
+                // Stop movement if STOP_HORIZONTAL is detected
+                if (collisionType != levelManager.CollisionType.STOP_HORIZONTAL) {
                     playerX -= MOVE_SPEED; // Allow movement
                 }
             } else {
-                playerX -= MOVE_SPEED; // No collision
+                playerX -= MOVE_SPEED; // No collision, allow movement
             }
+
             isMovingLeft = true;
             facingLeft = true;
         } else {
@@ -98,12 +100,14 @@ public class ForTheQueen extends JPanel implements KeyListener {
             if (collisionBox != null) {
                 levelManager.CollisionType collisionType = lvlManager.getCollisionType(collisionBox);
 
-                if (collisionType != collisionType.STOP_HORIZONTAL) {
+                // Stop movement if STOP_HORIZONTAL is detected
+                if (collisionType != levelManager.CollisionType.STOP_HORIZONTAL) {
                     playerX += MOVE_SPEED; // Allow movement
                 }
             } else {
-                playerX += MOVE_SPEED; // No collision
+                playerX += MOVE_SPEED; // No collision, allow movement
             }
+
             isMovingRight = true;
             facingLeft = false;
         } else {
@@ -118,7 +122,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
         if (collisionBox != null) {
             levelManager.CollisionType collisionType = lvlManager.getCollisionType(collisionBox);
 
-            if (collisionType == collisionType.SOLID) {
+            if (collisionType == levelManager.CollisionType.SOLID) {
                 if (verticalVelocity > 0) { // Falling onto the ground
                     playerY = collisionBox.y - PLAYER_HEIGHT;
                     verticalVelocity = 0;
@@ -127,11 +131,10 @@ public class ForTheQueen extends JPanel implements KeyListener {
                     playerY = collisionBox.y + collisionBox.height;
                     verticalVelocity = 0;
                 }
-            } else if (collisionType == collisionType.STOP_HORIZONTAL) {
-                // Allow falling through or jumping while touching tileId=17
+            } else if (collisionType == levelManager.CollisionType.STOP_HORIZONTAL) {
+                // Prevent vertical adjustment for horizontal collisions
                 if (verticalVelocity > 0) { // Falling
-                    playerY = collisionBox.y - PLAYER_HEIGHT;
-                    verticalVelocity = 0;
+                    verticalVelocity = 0; // Reset vertical velocity
                 }
             }
         } else {
