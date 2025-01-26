@@ -9,10 +9,12 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class ForTheQueen extends JPanel implements KeyListener {
 
-    private final levelManager lvlManager;
+    private levelManager lvlManager;
 
     private int playerX = 200; // Initial X position of the player
     private int playerY = 500; // Initial Y position of the player
@@ -40,6 +42,16 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private int animationSpeed = 10; // Lower = faster animation
     private int animationCounter = 0; // Timer for switching frames
 
+    // Time variables
+    private int totalTime = 80; // Total time in seconds
+    private int timeLeft = totalTime; // Time left in seconds
+    private JSlider timeSlider;
+    private JLabel timeLabel;
+
+    // Collider to load next level
+    private Rectangle colliderToNextLevel;
+    private levelLoader levelLoader; // Reference to levelLoader
+
     public ForTheQueen() {
         this.setFocusable(true);
         this.addKeyListener(this);
@@ -60,9 +72,20 @@ public class ForTheQueen extends JPanel implements KeyListener {
         idleFrames = levelManager.extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation
         runningFrames = levelManager.extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation
 
+        // Initialize the UI components
+        initUIComponents();
+
+        // Collider to next level
+        colliderToNextLevel = new Rectangle(600, 100, 20, 20);
+
+        // Initialize the level loader
+        levelLoader = new levelLoader();
+
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
         timer.start();
+
+        startCountdownTimer();
     }
 
     private void gameLoop() {
@@ -162,6 +185,11 @@ public class ForTheQueen extends JPanel implements KeyListener {
             animationFrame = (animationFrame + 1) % currentFrames.length;
         }
 
+        // Check if the player completed the level
+        if (playerRect.intersects(colliderToNextLevel)) {
+            levelLoader.loadNextLevel();
+        }
+
         repaint();
     }
 
@@ -185,7 +213,7 @@ public class ForTheQueen extends JPanel implements KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         // Background color
-        g.setColor(Color.LIGHT_GRAY);
+        g.setColor(new Color(0, 0, 222, 100));
         g.fillRect(0, 0, getWidth(), getHeight());
 
         // Draw the player sprite
@@ -210,6 +238,10 @@ public class ForTheQueen extends JPanel implements KeyListener {
         } else {
             g2d.drawImage(currentFrame, playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT, null);
         }
+
+        // Draw collider to next level
+        g.setColor(Color.BLACK);
+        g.fillRect(colliderToNextLevel.x, colliderToNextLevel.y, colliderToNextLevel.width, colliderToNextLevel.height);
     }
 
     @Override
@@ -220,6 +252,11 @@ public class ForTheQueen extends JPanel implements KeyListener {
         if (key == KeyEvent.VK_SPACE && !isJumping) {
             verticalVelocity = JUMP_STRENGTH; // Apply upwards veloity
             isJumping = true; // Prevents double jump
+        }
+
+        // Resets the level
+        if (key == KeyEvent.VK_R) {
+            resetLevel();
         }
 
         repaint();
@@ -241,17 +278,83 @@ public class ForTheQueen extends JPanel implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        // Not used but required 
+        // DO NOT REMOVE THIS
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("For The Queen");
-        ForTheQueen game = new ForTheQueen();
+        new ForTheQueen();
+    }
 
-        frame.add(game);
+    private void initUIComponents() {
+        // Create a slider for the timer
+        timeSlider = new JSlider(0, totalTime, totalTime);
+        timeSlider.setEnabled(false); // Disable user interactions
+        timeSlider.setMajorTickSpacing(10);
+        timeSlider.setMinorTickSpacing(1);
+        timeSlider.setPaintTicks(true);
+        timeSlider.setPaintLabels(true);
+
+        // Create a label to display the time left
+        timeLabel = new JLabel("Time left: " + totalTime + "s");
+        timeLabel.setFont(new Font("Comic Sans", Font.BOLD, 16));
+
+        // Add slider and label to a panel
+        JPanel timerPanel = new JPanel(new BorderLayout());
+        timerPanel.add(timeLabel, BorderLayout.WEST);
+        timerPanel.add(timeSlider, BorderLayout.CENTER);
+
+        // Add the panel to the top of the main window
+        JFrame frame = new JFrame("For The Queen!");
+        frame.setLayout(new BorderLayout());
+        frame.add(this, BorderLayout.CENTER);
+        frame.add(timerPanel, BorderLayout.NORTH);
+
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    private void startCountdownTimer() {
+        Timer countdownTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (timeLeft > 0) {
+                    timeLeft--; // Decrement the time left
+                    timeSlider.setValue(timeLeft); // Update the slider
+                    timeLabel.setText("Time Left: " + timeLeft + "s"); // Update the label
+                } else {
+                    ((Timer) e.getSource()).stop(); // Stop the timer when time runs out
+                    onTimeOut();
+                }
+            }
+        });
+        countdownTimer.start();
+    }
+
+    private void onTimeOut() {
+        // Handle what happens when the time runs out
+        JOptionPane.showMessageDialog(this, "Time's up! Game Over.");
+        resetLevel(); // Rresets the level
+    }
+
+    public void resetLevel() {
+        playerX = 200;
+        playerY = 500;
+        timeLeft = totalTime;
+    }
+
+    public void loadNextLevel() {
+        // Load the level
+        lvlManager = new levelManager("Level1.json", "../common/sprites/world_tileset.png");
+
+        // Collider to next level
+        colliderToNextLevel = new Rectangle(600, 200, 20, 20);
+
+        // Sets the new total time to complete the level
+        totalTime = 20;
+
+        // Resets level
+        resetLevel();
     }
 }
