@@ -124,14 +124,14 @@ public class levelManager {
         }*/
     }
 
-    // Check collision with player
-    public boolean checkCollision(Rectangle player) {
+    // Check collision with player and return the first intersecting box
+    public Rectangle checkCollision(Rectangle player) {
         for (Rectangle box : collisionBoxes) {
             if (player.intersects(box)) {
-                return true;
+                return box; // Return the specific collision box
             }
         }
-        return false;
+        return null; // No collision
     }
 
     public static BufferedImage[] extractFrames(BufferedImage spriteSheet, int row, int frameCount, int frameWidth, int frameHeight) {
@@ -140,5 +140,38 @@ public class levelManager {
             frames[i] = spriteSheet.getSubimage(i * frameWidth, row * frameHeight, frameWidth, frameHeight);
         }
         return frames;
+    }
+
+    public int getTileID(Rectangle box) {
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+                int tileId = map.getJSONArray("layers").getJSONObject(0).getJSONArray("data")
+                        .getInt(y * mapWidth + x);
+                if (box.x == x * tileWidth && box.y == y * tileHeight) {
+                    return tileId;
+                }
+            }
+        }
+        return -1; // No matching ID
+    }
+
+    public ForTheQueen.collisionType getCollisionType(Rectangle box) {
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+                int tileId = map.getJSONArray("layers").getJSONObject(0).getJSONArray("data")
+                        .getInt(y * mapWidth + x);
+                if (box.x == x * tileWidth && box.y == y * tileHeight) {
+                    switch (tileId) {
+                        case 1:
+                            return ForTheQueen.collisionType.SOLID; // Regular ground tile
+                        case 17:
+                            return ForTheQueen.collisionType.STOP_HORIZONTAL; // Special tile
+                        default:
+                            return ForTheQueen.collisionType.NONE; // No collision
+                    }
+                }
+            }
+        }
+        return ForTheQueen.collisionType.NONE;
     }
 }

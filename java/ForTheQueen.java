@@ -23,7 +23,6 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private float verticalVelocity = 0; // Vertical velocity for jumping
     private final float GRAVITY = .5f; // Gravity pulling the player down
     private final float JUMP_STRENGTH = -10; // Jump strength
-    private final int FLOOR_Y = 300; // Y position of the "floor"
 
     private boolean isJumping = false; // Boolean to know if the player is jumping or not
     private boolean isMovingLeft = false;
@@ -41,6 +40,12 @@ public class ForTheQueen extends JPanel implements KeyListener {
     private int animationSpeed = 10; // Lower = faster animation
     private int animationCounter = 0; // Timer for switching frames
 
+    public enum collisionType {
+        SOLID, // Fully blocks movement
+        STOP_HORIZONTAL, // Blocks horizontal movement only
+        NONE // No collision (empty space)
+    }
+
     public ForTheQueen() {
         this.setFocusable(true);
         this.addKeyListener(this);
@@ -54,12 +59,12 @@ public class ForTheQueen extends JPanel implements KeyListener {
             System.exit(1);
         }
 
+        // Load the level
+        lvlManager = new levelManager("Level0.json", "../common/sprites/world_tileset.png");
+
         // Extract frames using levelManager
         idleFrames = levelManager.extractFrames(spriteSheet, 0, 1, 13, 19); // Idle animation
         runningFrames = levelManager.extractFrames(spriteSheet, 1, 3, 13, 19); // Running animation
-
-        // Load the level
-        lvlManager = new levelManager("Level0.json", "../common/sprites/world_tileset.png");
 
         // Start a game loop using a timer
         Timer timer = new Timer(16, e -> gameLoop());
@@ -72,11 +77,19 @@ public class ForTheQueen extends JPanel implements KeyListener {
         // Create a rectangle representing the player's current position
         Rectangle playerRect = new Rectangle(playerX, playerY, PLAYER_WIDTH, PLAYER_HEIGHT);
 
-        // Handle horizontal movement
+        // Horizontal movement
         if (keysPressed.contains(KeyEvent.VK_LEFT)) {
-            playerRect.x -= MOVE_SPEED; // Test moving left
-            if (!lvlManager.checkCollision(playerRect)) {
-                playerX -= MOVE_SPEED; // Apply movement if no collider
+            playerRect.x -= MOVE_SPEED; // Predict next position
+            Rectangle collisionBox = lvlManager.checkCollision(playerRect);
+
+            if (collisionBox != null) {
+                collisionType collisionType = lvlManager.getCollisionType(collisionBox);
+
+                if (collisionType != collisionType.STOP_HORIZONTAL) {
+                    playerX -= MOVE_SPEED; // Allow movement
+                }
+            } else {
+                playerX -= MOVE_SPEED; // No collision
             }
             isMovingLeft = true;
             facingLeft = true;
@@ -85,9 +98,17 @@ public class ForTheQueen extends JPanel implements KeyListener {
         }
 
         if (keysPressed.contains(KeyEvent.VK_RIGHT)) {
-            playerRect.x += MOVE_SPEED; // Test moving right
-            if (!lvlManager.checkCollision(playerRect)) {
-                playerX += MOVE_SPEED; // Apply movement if no collider
+            playerRect.x += MOVE_SPEED; // Predict next position
+            Rectangle collisionBox = lvlManager.checkCollision(playerRect);
+
+            if (collisionBox != null) {
+                collisionType collisionType = lvlManager.getCollisionType(collisionBox);
+
+                if (collisionType != collisionType.STOP_HORIZONTAL) {
+                    playerX += MOVE_SPEED; // Allow movement
+                }
+            } else {
+                playerX += MOVE_SPEED; // No collision
             }
             isMovingRight = true;
             facingLeft = false;
@@ -95,33 +116,49 @@ public class ForTheQueen extends JPanel implements KeyListener {
             isMovingRight = false;
         }
 
-        // Apply gravity and vertical movement
-        playerRect.y += verticalVelocity; // Test vertical movement
-        if (!lvlManager.checkCollision(playerRect)) {
-            playerY += verticalVelocity; // Apply vertical movement if no collision
+        // Gravity and vertical movement
+        verticalVelocity += GRAVITY;
+        playerRect.y += verticalVelocity; // Predict next position
+
+        Rectangle collisionBox = lvlManager.checkCollision(playerRect);
+        if (collisionBox != null) {
+            collisionType collisionType = lvlManager.getCollisionType(collisionBox);
+
+            if (collisionType == collisionType.SOLID) {
+                if (verticalVelocity > 0) { // Falling onto the ground
+                    playerY = collisionBox.y - PLAYER_HEIGHT;
+                    verticalVelocity = 0;
+                    isJumping = false;
+                } else if (verticalVelocity < 0) { // Hitting a ceiling
+                    playerY = collisionBox.y + collisionBox.height;
+                    verticalVelocity = 0;
+                }
+            } else if (collisionType == collisionType.STOP_HORIZONTAL) {
+                // Allow falling through or jumping while touching tileId=17
+                if (verticalVelocity > 0) { // Falling
+                    playerY = collisionBox.y - PLAYER_HEIGHT;
+                    verticalVelocity = 0;
+                }
+            }
         } else {
-            verticalVelocity = 0; // Stop vertical movement on collision
-            isJumping = false; // Reset jumping state if landing
+            // No collision, apply gravity
+            playerY += verticalVelocity;
         }
 
-        // Apply gravity if the player is above the floor
-        if (playerY < FLOOR_Y || verticalVelocity < 0) {
-            verticalVelocity += GRAVITY;
+        // Jumping logic: Only jump if touching a SOLID tile
+        if (keysPressed.contains(KeyEvent.VK_SPACE) && !isJumping) {
+            playerRect.y += 1; // Check for ground below
+            Rectangle groundBox = lvlManager.checkCollision(playerRect);
+            if (groundBox != null && lvlManager.getCollisionType(groundBox) == collisionType.SOLID) {
+                verticalVelocity = JUMP_STRENGTH; // Jump up
+                isJumping = true;
+            }
         }
 
-        // Ensure the player doesn't fall through the floor
-        if (playerY >= FLOOR_Y) {
-            playerY = FLOOR_Y;
-            verticalVelocity = 0;
-            isJumping = false;
-        }
-
-        // Reset animationFrame if the current animation changes
+        // Update animation
         if (animationFrame >= currentFrames.length) {
             animationFrame = 0;
         }
-
-        // Update animation frame
         animationCounter++;
         if (animationCounter >= animationSpeed) {
             animationCounter = 0;
@@ -153,10 +190,6 @@ public class ForTheQueen extends JPanel implements KeyListener {
         // Background color
         g.setColor(Color.LIGHT_GRAY);
         g.fillRect(0, 0, getWidth(), getHeight());
-
-        // Draw floor
-        g.setColor(Color.GREEN);
-        g.fillRect(0, FLOOR_Y + PLAYER_HEIGHT, getWidth(), getWidth() - FLOOR_Y);
 
         // Draw the player sprite
         BufferedImage currentFrame = getCurrentAnimationFrames()[animationFrame];
