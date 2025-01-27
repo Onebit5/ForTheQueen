@@ -94,3 +94,36 @@ java/org/json/XMLParserConfiguration.java
 java/org/json/XMLTokener.java
 java/org/json/XMLXsiTypeConverter.java
 lua/love-api/
+.vs/For The Queen\!/v17/ipch/AutoPCH/189db1d04fd25a42/RENDERER.ipch
+.vs/For The Queen\!/v17/ipch/AutoPCH/2026f577f1dfb5d1/INPUT.ipch
+.vs/For The Queen\!/v17/ipch/AutoPCH/4b68308ca8d74510/MAIN.ipch
+.vs/For The Queen\!/v17/ipch/AutoPCH/a9f4741fa458a5c/MAIN.ipch
+cpp/.vs/ForTheQueen/v17/.suo
+cpp/.vs/ForTheQueen/v17/Browse.VC.db
+cpp/.vs/ForTheQueen/v17/Browse.VC.db-shm
+cpp/.vs/ForTheQueen/v17/Browse.VC.db-wal
+cpp/.vs/ForTheQueen/v17/Browse.VC.opendb
+cpp/.vs/ForTheQueen/v17/DocumentLayout.backup.json
+cpp/.vs/ForTheQueen/v17/DocumentLayout.json
+cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/6af5f9994766b358/MAIN.ipch
+cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/cdf6dfdc7d5e10d6/RENDERER.ipch
+cpp/ForTheQueen.sln
+cpp/ForTheQueen.vcxproj
+cpp/ForTheQueen.vcxproj.filters
+cpp/ForTheQueen.vcxproj.user
+cpp/ForTheQueen/x64/Debug/ForTheQueen.exe.recipe
+cpp/ForTheQueen/x64/Debug/ForTheQueen.ilk
+cpp/ForTheQueen/x64/Debug/ForTheQueen.log
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/CL.command.1.tlog
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/Cl.items.tlog
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/CL.read.1.tlog
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/CL.write.1.tlog
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/ForTheQueen.lastbuildstate
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/link.command.1.tlog
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/link.read.1.tlog
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/link.secondary.1.tlog
+cpp/ForTheQueen/x64/Debug/ForTheQueen.tlog/link.write.1.tlog
+cpp/ForTheQueen/x64/Debug/vc143.idb
+cpp/ForTheQueen/x64/Debug/vc143.pdb
+cpp/x64/Debug/ForTheQueen.pdb
+CppProperties.json
