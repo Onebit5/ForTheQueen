@@ -39,3 +39,58 @@ luac.out
 *.x86_64
 *.hex
 
+.vs/tasks.vs.json
+*.vsidx
+.vs/For The Queen\!/v17/.wsuo
+.vs/For The Queen\!/v17/Browse.VC.db
+.vs/For The Queen\!/v17/Browse.VC.db-shm
+.vs/For The Queen\!/v17/Browse.VC.db-wal
+.vs/For The Queen\!/v17/Browse.VC.opendb
+.vs/For The Queen\!/v17/DocumentLayout.backup.json
+.vs/For The Queen\!/v17/DocumentLayout.json
+.vs/ProjectSettings.json
+.vs/slnx.sqlite
+.vs/slnx.sqlite-journal
+.vs/VSWorkspaceState.json
+java/org/json/CDL.java
+java/org/json/Cookie.java
+java/org/json/CookieList.java
+java/org/json/HTTP.java
+java/org/json/HTTPTokener.java
+java/org/json/JSONArray.class
+java/org/json/JSONArray.java
+java/org/json/JSONException.class
+java/org/json/JSONException.java
+java/org/json/JSONML.java
+java/org/json/JSONMLParserConfiguration.java
+java/org/json/JSONObject$Null.class
+java/org/json/JSONObject.class
+java/org/json/JSONObject.java
+java/org/json/JSONParserConfiguration.class
+java/org/json/JSONParserConfiguration.java
+java/org/json/JSONPointer$Builder.class
+java/org/json/JSONPointer.class
+java/org/json/JSONPointer.java
+java/org/json/JSONPointerException.class
+java/org/json/JSONPointerException.java
+java/org/json/JSONPropertyIgnore.class
+java/org/json/JSONPropertyIgnore.java
+java/org/json/JSONPropertyName.class
+java/org/json/JSONPropertyName.java
+java/org/json/JSONString.class
+java/org/json/JSONString.java
+java/org/json/JSONStringer.java
+java/org/json/JSONTokener.class
+java/org/json/JSONTokener.java
+java/org/json/JSONWriter.class
+java/org/json/JSONWriter.java
+java/org/json/ParserConfiguration.class
+java/org/json/ParserConfiguration.java
+java/org/json/Property.java
+java/org/json/StringBuilderWriter.class
+java/org/json/StringBuilderWriter.java
+java/org/json/XML.java
+java/org/json/XMLParserConfiguration.java
+java/org/json/XMLTokener.java
+java/org/json/XMLXsiTypeConverter.java
+lua/love-api/
