@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "input.hpp"
+#include <iostream>
 
 int main() {
     // Initialize the renderer
@@ -23,10 +24,12 @@ int main() {
 
         // Handle player movement
         if (Input::IsKeyPressed(Input::Key::Left)) {
+            std::cout << "Left key pressed" << std::endl; // Debug, just in case
             playerX -= movementSpeed * .016f; // DeltaTime simulation
         }
 
         if (Input::IsKeyPressed(Input::Key::Right)) {
+            std::cout << "Right key pressed" << std::endl; // Debug, just in case
             playerX += movementSpeed * .016f; // DeltaTime simulation
         }
 
