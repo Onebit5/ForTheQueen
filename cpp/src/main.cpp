@@ -7,19 +7,35 @@ int main() {
         return -1;
     }
 
+    // Player variables
+    int playerWidth = 50, playerHeight = 100;
+    int playerX = 375, playerY = 500;
+    int movementSpeed = 200;
+
     // Main game loop
     while (Renderer::ProcessMessages()) {
         // Process input
         Input::Update();
+
         if (Input::IsKeyPressed(Input::Key::Escape)) {
             break;
         }
+
+        // Handle player movement
+        if (Input::IsKeyPressed(Input::Key::Left)) {
+            playerX -= movementSpeed * .016f; // DeltaTime simulation
+        }
+
+        if (Input::IsKeyPressed(Input::Key::Right)) {
+            playerX += movementSpeed * .016f; // DeltaTime simulation
+        }
+
 
         // Clear the screen
         Renderer::Clear();
 
         // Draw a rectangle 
-        Renderer::DrawRect(375, 500, 50, 100, 0, 0, 255); // Blue rectangle
+        Renderer::DrawRect(playerX, playerY, playerWidth, playerHeight, 255, 0, 0); // Blue rectangle
 
         // Display the frame
         Renderer::Present();
