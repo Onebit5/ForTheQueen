@@ -17,6 +17,7 @@ namespace Renderer {
 	// Shuts down the renderer
 	void Shutdown();
 
+	// Processes incoming messages and events
 	bool ProcessMessages();
 }
 
