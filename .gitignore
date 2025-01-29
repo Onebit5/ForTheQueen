@@ -128,3 +128,9 @@ cpp/ForTheQueen/x64/Debug/vc143.pdb
 cpp/x64/Debug/ForTheQueen.pdb
 CppProperties.json
 cpp/.vs/ForTheQueen/v17/Solution.VC.db
+cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/1cfa01689f276675/TILEMAP.ipch
+cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/1fe5037943c1e42b/JSONLOADER.ipch
+cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/21ffa441fc76766f/TILEMAP.ipch
+cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/4754103f9c1e18b0/LEVEL.ipch
+*.ipch
+*.tlog
