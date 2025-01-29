@@ -14,7 +14,7 @@ int main() {
     // Create a Level object to manage the game level
     Level level;
     // Load the level from a JSON file and a tileset image, specifying tile dimensions
-    if (!level.Load("level0.json", "world_tileset.png", 16, 16)) {
+    if (!level.Load("Level0.json", "../common/sprites/world_tileset.png", 16, 16)) {
         return -1; // Return -1 if level loading fails
     }
 

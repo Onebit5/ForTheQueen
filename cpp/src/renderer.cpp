@@ -32,7 +32,7 @@ namespace Renderer {
         screenHeight = height; // Set the screen height
 
         // Create framebuffer
-        framebuffer.resize(screenWidth * screenHeight * 4, 255); // RGBA, initialized to white
+        framebuffer.resize(screenWidth * screenHeight * 16, 255); // RGBA, initialized to white
 
         // Register Window Class
         WNDCLASS wc = {}; // Initialize window class structure
@@ -67,7 +67,7 @@ namespace Renderer {
                 framebuffer[index + 0] = r; // Set red component
                 framebuffer[index + 1] = g; // Set green component
                 framebuffer[index + 2] = b; // Set blue component
-                framebuffer[index + 3] = 255; // Set alpha component (fully opaque)
+                framebuffer[index + 3] = 255; // Set alpha component
             }
         }
     }
