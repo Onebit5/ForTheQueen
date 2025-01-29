@@ -134,3 +134,5 @@ cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/21ffa441fc76766f/TILEMAP.ipch
 cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/4754103f9c1e18b0/LEVEL.ipch
 *.ipch
 *.tlog
+*.aps
+*.rc
