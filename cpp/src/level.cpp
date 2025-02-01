@@ -1,27 +1,61 @@
+#define STB_IMAGE_IMPLEMENTATION
 #include "level.hpp"
-#include "jsonLoader.hpp"
+#include "stb_image.h" // Include stb_image header
 #include <iostream>
 
-// Function to load level data from a JSON file and tilemap
-bool Level::Load(const std::string& jsonPath, const std::string& tilemapPath, int tileWidth, int tileHeight) {
-    levelData = JSONLoader::LoadLevel(jsonPath); // Load level data from the specified JSON path
+bool Level::Load(const std::string& pngPath) {
+    int x, y, n;
+    unsigned char* data = stbi_load(pngPath.c_str(), &x, &y, &n, 3); // Request 3 channels (RGB)
+    if (!data) {
+        std::cerr << "ERROR: Could not load PNG file: " << pngPath << "\n";
+        return false;
+    }
 
-    std::cout << "Load level data: " << levelData.level.size() << " rows, "
-        << (levelData.level .empty() ? 0 : levelData.level[0].size()) << " columns" << std::endl;
-        
+    width = x;
+    height = y;
 
-    return tilemap.LoadTilemap(tilemapPath, tileWidth, tileHeight); // Load the tilemap and return success status
+    std::cout << "Width: " << width << ", Height: " << height << "\n";
+
+    imageData.resize(height, std::vector<Pixel>(width));
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            unsigned char* pixel = &data[(y * width + x) * 3];
+            // Swap R and B channels
+            imageData[y][x].r = pixel[2]; // Red channel (was Blue)
+            imageData[y][x].g = pixel[1]; // Green channel
+            imageData[y][x].b = pixel[0]; // Blue channel (was Red)
+
+            // Debug output for first few pixels
+            /*if (y == 0 && x < 5) {
+                std::cout << "Pixel at (" << x << "," << y << ") Original RGB: ("
+                    << static_cast<int>(pixel[0]) << ","
+                    << static_cast<int>(pixel[1]) << ","
+                    << static_cast<int>(pixel[2]) << ") "
+                    << "Converted RGB: ("
+                    << static_cast<int>(imageData[y][x].r) << ","
+                    << static_cast<int>(imageData[y][x].g) << ","
+                    << static_cast<int>(imageData[y][x].b) << ")\n";
+            }*/
+        }
+    }
+
+    stbi_image_free(data); // Free the image data after usage
+    return true;
 }
 
-// Function to render the level on the given device context
-void Level::Render(HDC hdc) {
-    // Iterate through each row of the level grid
-    for (int y = 0; y < levelData.level.size(); ++y) {
-        // Iterate through each column of the level grid
-        for (int x = 0; x < levelData.level[y].size(); ++x) {
-            int tileID = levelData.level[y][x]; // Get the tile ID from the level grid
-            // Render the tile at the calculated position using the device context
-            tilemap.RenderTile(tileID, x * levelData.tilewidth, y * levelData.tileheight, hdc);
+void Level::Render() {
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            const Pixel& pixel = imageData[y][x];
+            // Debug output for first few pixels during rendering
+            /*if (y == 0 && x < 5) {
+                std::cout << "Rendering pixel at (" << x << "," << y << ") RGB: ("
+                    << static_cast<int>(pixel.r) << ","
+                    << static_cast<int>(pixel.g) << ","
+                    << static_cast<int>(pixel.b) << ")\n";
+            }*/
+            Renderer::DrawRect(x, y, 1, 1, pixel.r, pixel.g, pixel.b);
         }
     }
 }

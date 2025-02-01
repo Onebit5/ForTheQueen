@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 #include <windows.h>
 #include <vector>
+#include <iostream>
 
 // Internal variables
 HWND hwnd; // Handle to the window
@@ -30,24 +31,19 @@ namespace Renderer {
     bool Init(int width, int height, const char* title) {
         screenWidth = width; // Set the screen width
         screenHeight = height; // Set the screen height
-
         // Create framebuffer
-        framebuffer.resize(screenWidth * screenHeight * 16, 255); // RGBA, initialized to white
-
+        framebuffer.resize(screenWidth * screenHeight * 4, 255); // RGBA, initialized to white
         // Register Window Class
         WNDCLASS wc = {}; // Initialize window class structure
         wc.lpfnWndProc = WindowProc; // Set the window procedure
         wc.hInstance = GetModuleHandle(NULL); // Get the current instance handle
         wc.lpszClassName = "2D_Engine_Window"; // Set the window class name
         RegisterClass(&wc); // Register the window class
-
         // Create Window
         hwnd = CreateWindowEx(0, "2D_Engine_Window", title, WS_OVERLAPPEDWINDOW,
             CW_USEDEFAULT, CW_USEDEFAULT, screenWidth, screenHeight,
             NULL, NULL, GetModuleHandle(NULL), NULL); // Create the window
-
         if (!hwnd) return false; // Check if window creation failed
-
         ShowWindow(hwnd, SW_SHOW); // Show the window
         hdc = GetDC(hwnd); // Get the device context for the window
         return true; // Return true to indicate successful initialization
@@ -58,16 +54,32 @@ namespace Renderer {
     }
 
     void DrawRect(int x, int y, int width, int height, unsigned char r, unsigned char g, unsigned char b) {
+        // Debug output for first few pixels during rendering
+        /*if (y == 0 && x < 5) {
+            std::cout << "Drawing rect at (" << x << ", " << y << "): "
+                << "Size=" << width << "x" << height << ", "
+                << "Color=(" << static_cast<int>(r) << ", "
+                << static_cast<int>(g) << ", "
+                << static_cast<int>(b) << ")\n";
+        }*/
+
         for (int py = y; py < y + height; py++) { // Loop through each row
             for (int px = x; px < x + width; px++) { // Loop through each column
                 if (px < 0 || px >= screenWidth || py < 0 || py >= screenHeight) // Check bounds
                     continue; // Skip if out of bounds
-
                 int index = (py * screenWidth + px) * 4; // Calculate index for RGBA
                 framebuffer[index + 0] = r; // Set red component
                 framebuffer[index + 1] = g; // Set green component
                 framebuffer[index + 2] = b; // Set blue component
                 framebuffer[index + 3] = 255; // Set alpha component
+
+                // Debug output for framebuffer updates
+                /*if (py == 0 && px < 5) {
+                    std::cout << "Framebuffer update at (" << px << "," << py << ") RGB: ("
+                        << static_cast<int>(framebuffer[index + 0]) << ","
+                        << static_cast<int>(framebuffer[index + 1]) << ","
+                        << static_cast<int>(framebuffer[index + 2]) << ")\n";
+                }*/
             }
         }
     }
@@ -80,6 +92,7 @@ namespace Renderer {
         bmi.bmiHeader.biPlanes = 1; // Set number of color planes
         bmi.bmiHeader.biBitCount = 32; // Set bits per pixel
         bmi.bmiHeader.biCompression = BI_RGB; // Set compression type
+        bmi.bmiHeader.biSizeImage = screenWidth * screenHeight * 4; // Set image size
 
         // Draw the framebuffer to the window
         StretchDIBits(hdc, 0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight,

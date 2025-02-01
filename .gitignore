@@ -137,3 +137,6 @@ cpp/.vs/ForTheQueen/v17/ipch/AutoPCH/4754103f9c1e18b0/LEVEL.ipch
 *.aps
 *.rc
 cpp/resource.h
+*.log
+*.txt
+*.pdb

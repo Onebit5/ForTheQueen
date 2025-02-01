@@ -1,21 +1,23 @@
 #ifndef LEVEL_HPP
 #define LEVEL_HPP
 
+#include <vector>
+#include <string>
 #include "renderer.hpp"
-#include "tilemap.hpp"
-#include "levelData.hpp"
 
 class Level {
 public:
-    // Function to load level data from specified JSON and tilemap paths
-    bool Load(const std::string& jsonPath, const std::string& tilemapPath, int tilewidth, int tileheight);
-
-    // Function to render the level using the provided device context
-    void Render(HDC hdc);
+    bool Load(const std::string& pngPath);
+    void Render();
 
 private:
-    Tilemap tilemap; // Object to manage the tilemap of the level
-    LevelData levelData; // Object to hold the level's data
+    struct Pixel {
+        unsigned char r, g, b;
+    };
+
+    std::vector<std::vector<Pixel>> imageData; // 2D vector to store the image pixel data
+    int width;
+    int height;
 };
 
 #endif
