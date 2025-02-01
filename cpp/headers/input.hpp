@@ -1,11 +1,14 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-namespace Input {
-	enum class Key { Escape, Left, Right };
+namespace Input { 
+	enum class Key { Escape, Left, Right }; // Enum class to define key states
 
-	void Update(); // Updates the key states
-	bool IsKeyPressed(Key key); // Checks if a key is pressed
+	// Function to update the key states
+	void Update(); 
+
+	// Function to check if a specific key is pressed
+	bool IsKeyPressed(Key key); 
 }
 
 #endif

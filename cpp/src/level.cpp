@@ -3,7 +3,7 @@
 #include "stb_image.h" // Include stb_image header
 #include <iostream>
 
-bool Level::Load(const std::string& pngPath) {
+bool Level::Load(const std::string& pngPath, int screenWidth, int screenHeight) {
     int x, y, n;
     unsigned char* data = stbi_load(pngPath.c_str(), &x, &y, &n, 3); // Request 3 channels (RGB)
     if (!data) {
@@ -16,27 +16,18 @@ bool Level::Load(const std::string& pngPath) {
 
     std::cout << "Width: " << width << ", Height: " << height << "\n";
 
-    imageData.resize(height, std::vector<Pixel>(width));
+    // Resize the image data to hold RGBA values
+    imageData.resize(width * height * 4);
 
+    // Convert BGR to RGB and store in imageData
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             unsigned char* pixel = &data[(y * width + x) * 3];
-            // Swap R and B channels
-            imageData[y][x].r = pixel[2]; // Red channel (was Blue)
-            imageData[y][x].g = pixel[1]; // Green channel
-            imageData[y][x].b = pixel[0]; // Blue channel (was Red)
-
-            // Debug output for first few pixels
-            /*if (y == 0 && x < 5) {
-                std::cout << "Pixel at (" << x << "," << y << ") Original RGB: ("
-                    << static_cast<int>(pixel[0]) << ","
-                    << static_cast<int>(pixel[1]) << ","
-                    << static_cast<int>(pixel[2]) << ") "
-                    << "Converted RGB: ("
-                    << static_cast<int>(imageData[y][x].r) << ","
-                    << static_cast<int>(imageData[y][x].g) << ","
-                    << static_cast<int>(imageData[y][x].b) << ")\n";
-            }*/
+            int index = (y * width + x) * 4;
+            imageData[index + 0] = pixel[2]; // Red channel 
+            imageData[index + 1] = pixel[1]; // Green channel
+            imageData[index + 2] = pixel[0]; // Blue channel 
+            imageData[index + 3] = 255;      // Alpha channel
         }
     }
 
@@ -44,18 +35,19 @@ bool Level::Load(const std::string& pngPath) {
     return true;
 }
 
-void Level::Render() {
+void Level::Render(std::vector<unsigned char>& framebuffer, int screenWidth, int screenHeight) {
+    // Copy the PNG image data into the framebuffer
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            const Pixel& pixel = imageData[y][x];
-            // Debug output for first few pixels during rendering
-            /*if (y == 0 && x < 5) {
-                std::cout << "Rendering pixel at (" << x << "," << y << ") RGB: ("
-                    << static_cast<int>(pixel.r) << ","
-                    << static_cast<int>(pixel.g) << ","
-                    << static_cast<int>(pixel.b) << ")\n";
-            }*/
-            Renderer::DrawRect(x, y, 1, 1, pixel.r, pixel.g, pixel.b);
+            int srcIndex = (y * width + x) * 4; // Index in the PNG image data
+            int dstIndex = ((y * screenWidth) + x) * 4; // Index in the framebuffer
+
+            if (x >= screenWidth || y >= screenHeight) continue;
+
+            framebuffer[dstIndex + 0] = imageData[srcIndex + 0]; // Red
+            framebuffer[dstIndex + 1] = imageData[srcIndex + 1]; // Green
+            framebuffer[dstIndex + 2] = imageData[srcIndex + 2]; // Blue
+            framebuffer[dstIndex + 3] = imageData[srcIndex + 3]; // Alpha
         }
     }
 }
