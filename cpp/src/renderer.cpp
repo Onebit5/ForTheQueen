@@ -114,14 +114,13 @@ namespace Renderer {
     }
 
     void Renderer::RestoreArea(int x, int y, int width, int height, const std::vector<unsigned char>& source, int screenWidth, int screenHeight) {
-        for (int py = y; py < y + height; ++py) {
-            if (py < 0 || py >= screenHeight) continue; // Skip if y is out of bounds
+        for (int py = 0; py < height; ++py) {
+            for (int px = 0; px < width; ++px) {
+                int srcIndex = ((y + py) * screenWidth + (x + px)) * 4; // Index in the source buffer
+                int dstIndex = ((y + py) * screenWidth + (x + px)) * 4; // Index in the framebuffer
 
-            for (int px = x; px < x + width; ++px) {
-                if (px < 0 || px >= screenWidth) continue; // Skip if x is out of bounds
-
-                int srcIndex = (py * screenWidth + px) * 4; // Index in the source buffer
-                int dstIndex = (py * screenWidth + px) * 4; // Index in the framebuffer
+                // Validate bounds
+                if (x + px < 0 || x + px >= screenWidth || y + py < 0 || y + py >= screenHeight) continue;
 
                 framebuffer[dstIndex + 0] = source[srcIndex + 0]; // Red
                 framebuffer[dstIndex + 1] = source[srcIndex + 1]; // Green

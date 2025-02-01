@@ -3,8 +3,9 @@
 #include "level.hpp"
 #include <iostream>
 #include <chrono>
-//#include <windows.h> // For performance monitoring
-//#include <psapi.h>   // For memory usage
+#include "player.hpp"
+#include <windows.h> // For performance monitoring
+#include <psapi.h>   // For memory usage
 
 //#pragma comment(lib, "Psapi.lib") 
 
@@ -69,20 +70,51 @@ int main() {
     std::vector<unsigned char> preRenderedLevel(1280 * 720 * 4, 255); // RGBA
     level.Render(preRenderedLevel, 1280, 720);
 
+    // Load the player
+    Player player;
+
+    // Load the idle sprite sheet (128x32, 32x32 frames)
+    if (!player.LoadSpriteSheet("idle", "playerIDLE.png", 128, 32)) {
+        std::cerr << "Failed to load idle sprite sheet\n";
+        Renderer::Shutdown();
+        return 1;
+    }
+
+    // Generate frames for the idle animation
+    std::vector<Player::Frame> idleFrames = GenerateFrames(128, 32, 32, 32); // 4 frames (32x32 each)
+    player.AddAnimation("idle", "idle", idleFrames);
+
+    // Load the run sprite sheet (512x32, 32x32 frames)
+    if (!player.LoadSpriteSheet("run", "playerRUN.png", 512, 32)) {
+        std::cerr << "Failed to load idle sprite sheet\n";
+        Renderer::Shutdown();
+        return 1;
+    }
+
+    // Generate frames for the run animation
+    std::vector<Player::Frame> runFrames = GenerateFrames(512, 32, 32, 32); // 16 frames (32x32 each)
+    player.AddAnimation("run", "run", runFrames);
+
+    // Start playing the idle animation
+    player.PlayAnimation("idle");
+
     // Render the level into the framebuffer once
     Renderer::Clear();
     level.Render(Renderer::GetFramebuffer(), 1280, 720);
 
     // Define player dimensions and initial position
-    int playerWidth = 13, playerHeight = 19; // Player's width and height
+    int playerWidth = 32, playerHeight = 32; // Player's width and height
     int playerX = 375, playerY = 500; // Player's initial position on the screen
     int prevPlayerX = playerX; // Track the player's previous position
     float movementSpeed = 100.0f; // Player's movement speed in pixels per second
 
     // FPS counter variables
-    /*auto lastFrameTime = std::chrono::high_resolution_clock::now();
-    int frameCount = 0;
+    auto lastFrameTime = std::chrono::high_resolution_clock::now();
+    /*int frameCount = 0;
     double fps = 0.0;*/
+
+    bool isMoving = false; // Track whether the player is moving
+    bool isFacingLeft = false; // Track the player's facing direction (true = left, false = right)
 
     // Main game loop
     while (Renderer::ProcessMessages()) {
@@ -95,27 +127,48 @@ int main() {
         }
 
         // Handle player movement based on key presses
+        bool wasMoving = isMoving;
+        isMoving = false;
+
+        // Handle player movement based on key presses
         if (Input::IsKeyPressed(Input::Key::Left)) {
             playerX -= static_cast<int>(movementSpeed * 0.016f); // Move player left
+            isMoving = true;
+            isFacingLeft = true;
         }
         if (Input::IsKeyPressed(Input::Key::Right)) {
             playerX += static_cast<int>(movementSpeed * 0.016f); // Move player right
+            isMoving = true;
+            isFacingLeft = false;
         }
 
         // Restore the level in the area where the player was previously drawn
         Renderer::RestoreArea(prevPlayerX, playerY, playerWidth, playerHeight, preRenderedLevel, 1280, 720);
 
-        // Draw the player as a red rectangle at the current position
-        Renderer::DrawRect(playerX, playerY, playerWidth, playerHeight, 255, 0, 0); // Red rectangle
+        // Update the player animation
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        double deltaTime = std::chrono::duration<double>(currentTime - lastFrameTime).count();
+
+        if (isMoving && !wasMoving) {
+            player.PlayAnimation("run"); // Switch to running animation
+        }
+        else if (!isMoving && wasMoving) {
+            player.PlayAnimation("idle"); // Switch back to idle animation
+        }
+
+        player.Update(static_cast<float>(deltaTime));
+
+        // Draw the player sprite at the current position
+        bool flipHorizontal = isFacingLeft; // Flip if moving left
+        player.Render(playerX, playerY, Renderer::GetFramebuffer(), 1280, 720, flipHorizontal);
 
         // Update the player's previous position
         prevPlayerX = playerX;
 
-        // Draw the player as a red rectangle at the current position
-        Renderer::DrawRect(playerX, playerY, playerWidth, playerHeight, 255, 0, 0); // Red rectangle
-
         // Present the rendered frame to the screen
         Renderer::Present();
+
+        lastFrameTime = currentTime;
 
         // FPS calculation
         /*auto currentTime = std::chrono::high_resolution_clock::now();
