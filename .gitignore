@@ -140,3 +140,5 @@ cpp/resource.h
 *.log
 *.txt
 *.pdb
+cpp/headers/stb_image.h
+cpp/knight.png

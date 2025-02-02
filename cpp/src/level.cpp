@@ -32,6 +32,13 @@ bool Level::Load(const std::string& pngPath, int screenWidth, int screenHeight) 
     }
 
     stbi_image_free(data); // Free the image data after usage
+
+    // Define collision boundaries
+    collisionBoundaries = {
+        {0, 550, 1280, 20}
+    };
+
+    std::cout << "Level loaded successfully with collision boundaries\n";
     return true;
 }
 

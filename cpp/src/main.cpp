@@ -4,52 +4,12 @@
 #include <iostream>
 #include <chrono>
 #include "player.hpp"
-#include <windows.h> // For performance monitoring
-#include <psapi.h>   // For memory usage
+#include <windows.h> 
+#include <psapi.h>   
 
-//#pragma comment(lib, "Psapi.lib") 
-
-// Function to get current memory usage (in MB)
-/*double GetMemoryUsage() {
-    PROCESS_MEMORY_COUNTERS_EX pmc;
-    if (GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) {
-        return static_cast<double>(pmc.PrivateUsage) / (1024 * 1024); // Convert bytes to MB
-    }
-    return 0.0;
-}*/
-
-// Function to get CPU usage (percentage)
-/*double GetCPUUsage() {
-    static FILETIME prevIdleTime = { 0 }, prevKernelTime = { 0 }, prevUserTime = { 0 };
-    FILETIME idleTime, kernelTime, userTime;
-
-    if (!GetSystemTimes(&idleTime, &kernelTime, &userTime)) {
-        return 0.0;
-    }
-
-    ULARGE_INTEGER idle, kernel, user;
-    idle.LowPart = idleTime.dwLowDateTime;
-    idle.HighPart = idleTime.dwHighDateTime;
-
-    kernel.LowPart = kernelTime.dwLowDateTime;
-    kernel.HighPart = kernelTime.dwHighDateTime;
-
-    user.LowPart = userTime.dwLowDateTime;
-    user.HighPart = userTime.dwHighDateTime;
-
-    ULONGLONG idleDelta = idle.QuadPart - ((ULARGE_INTEGER{ prevIdleTime.dwLowDateTime, prevIdleTime.dwHighDateTime }).QuadPart);
-    ULONGLONG kernelDelta = kernel.QuadPart - ((ULARGE_INTEGER{ prevKernelTime.dwLowDateTime, prevKernelTime.dwHighDateTime }).QuadPart);
-    ULONGLONG userDelta = user.QuadPart - ((ULARGE_INTEGER{ prevUserTime.dwLowDateTime, prevUserTime.dwHighDateTime }).QuadPart);
-
-    ULONGLONG total = kernelDelta + userDelta;
-    double cpuUsage = total > 0 ? (1.0 - static_cast<double>(idleDelta) / total) * 100.0 : 0.0;
-
-    prevIdleTime = idleTime;
-    prevKernelTime = kernelTime;
-    prevUserTime = userTime;
-
-    return cpuUsage;
-}*/
+bool isColliding(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2) {
+    return !(x1 + width1 <= x2 || x2 + width2 <= x1 || y1 + height1 <= y2 || y2 + height2 <= y1);
+}
 
 int main() {
     // Initialize the renderer
@@ -72,30 +32,22 @@ int main() {
 
     // Load the player
     Player player;
-
-    // Load the idle sprite sheet (128x32, 32x32 frames)
     if (!player.LoadSpriteSheet("idle", "playerIDLE.png", 128, 32)) {
         std::cerr << "Failed to load idle sprite sheet\n";
         Renderer::Shutdown();
         return 1;
     }
-
-    // Generate frames for the idle animation
-    std::vector<Player::Frame> idleFrames = GenerateFrames(128, 32, 32, 32); // 4 frames (32x32 each)
+    std::vector<Player::Frame> idleFrames = GenerateFrames(128, 32, 32, 32);
     player.AddAnimation("idle", "idle", idleFrames);
 
-    // Load the run sprite sheet (512x32, 32x32 frames)
     if (!player.LoadSpriteSheet("run", "playerRUN.png", 512, 32)) {
-        std::cerr << "Failed to load idle sprite sheet\n";
+        std::cerr << "Failed to load run sprite sheet\n";
         Renderer::Shutdown();
         return 1;
     }
-
-    // Generate frames for the run animation
-    std::vector<Player::Frame> runFrames = GenerateFrames(512, 32, 32, 32); // 16 frames (32x32 each)
+    std::vector<Player::Frame> runFrames = GenerateFrames(512, 32, 32, 32);
     player.AddAnimation("run", "run", runFrames);
 
-    // Start playing the idle animation
     player.PlayAnimation("idle");
 
     // Render the level into the framebuffer once
@@ -105,21 +57,28 @@ int main() {
     // Define player dimensions and initial position
     int playerWidth = 32, playerHeight = 32; // Player's width and height
     int playerX = 375, playerY = 500; // Player's initial position on the screen
-    int prevPlayerX = playerX; // Track the player's previous position
+    int prevPlayerX = playerX, prevPlayerY = playerY; // Track the player's previous position
     float movementSpeed = 100.0f; // Player's movement speed in pixels per second
+    float gravity = 800.0f; // Stronger gravity for faster descent
+    float jumpVelocity = -400.0f; // Lower initial velocity for a shorter jump
+    float playerVelocityY = 0.0f; // Current vertical velocity
+    bool isOnGround = false; // Track whether the player is on the ground
 
-    // FPS counter variables
+    // Main game loop
     auto lastFrameTime = std::chrono::high_resolution_clock::now();
-    /*int frameCount = 0;
-    double fps = 0.0;*/
-
     bool isMoving = false; // Track whether the player is moving
     bool isFacingLeft = false; // Track the player's facing direction (true = left, false = right)
 
-    // Main game loop
     while (Renderer::ProcessMessages()) {
         // Update input states for the current frame
         Input::Update();
+
+        // Calculate delta time
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        double deltaTime = std::chrono::duration<double>(currentTime - lastFrameTime).count();
+
+        // Use a fixed time step for physics
+        const float fixedDeltaTime = 1.0f / 60.0f;
 
         // Check if the Escape key is pressed to exit the game
         if (Input::IsKeyPressed(Input::Key::Escape)) {
@@ -130,65 +89,98 @@ int main() {
         bool wasMoving = isMoving;
         isMoving = false;
 
-        // Handle player movement based on key presses
         if (Input::IsKeyPressed(Input::Key::Left)) {
-            playerX -= static_cast<int>(movementSpeed * 0.016f); // Move player left
+            int newX = playerX - static_cast<int>(movementSpeed * fixedDeltaTime);
+            bool collision = false;
             isMoving = true;
             isFacingLeft = true;
+
+            for (const auto& boundary : level.GetCollisionBoundaries()) {
+                if (isColliding(newX, playerY, playerWidth, playerHeight,
+                    boundary.x, boundary.y, boundary.width, boundary.height)) {
+                    collision = true;
+                    break;
+                }
+            }
+            if (!collision) {
+                playerX = newX;
+            }
         }
+
         if (Input::IsKeyPressed(Input::Key::Right)) {
-            playerX += static_cast<int>(movementSpeed * 0.016f); // Move player right
+            int newX = playerX + static_cast<int>(movementSpeed * fixedDeltaTime);
+            bool collision = false;
             isMoving = true;
             isFacingLeft = false;
+
+            for (const auto& boundary : level.GetCollisionBoundaries()) {
+                if (isColliding(newX, playerY, playerWidth, playerHeight,
+                    boundary.x, boundary.y, boundary.width, boundary.height)) {
+                    collision = true;
+                    break;
+                }
+            }
+            if (!collision) {
+                playerX = newX;
+            }
         }
 
-        // Restore the level in the area where the player was previously drawn
-        Renderer::RestoreArea(prevPlayerX, playerY, playerWidth, playerHeight, preRenderedLevel, 1280, 720);
+        // Apply gravity
+        playerVelocityY += gravity * fixedDeltaTime;
 
-        // Update the player animation
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        double deltaTime = std::chrono::duration<double>(currentTime - lastFrameTime).count();
+        // Calculate the new Y position
+        int newY = playerY + static_cast<int>(playerVelocityY * fixedDeltaTime);
 
+        // Check for collisions with all boundaries
+        bool collision = false;
+        for (const auto& boundary : level.GetCollisionBoundaries()) {
+            if (isColliding(playerX, newY, playerWidth, playerHeight,
+                boundary.x, boundary.y, boundary.width, boundary.height)) {
+                collision = true;
+                playerVelocityY = 0.0f; // Reset vertical velocity
+                newY = boundary.y - playerHeight; // Align the player with the top of the boundary
+                isOnGround = true;
+                break;
+            }
+        }
+
+        if (!collision) {
+            isOnGround = false; // Player is no longer on the ground
+        }
+        playerY = newY;
+
+        // Handle jumping
+        if (Input::IsKeyPressed(Input::Key::Space) && isOnGround) {
+            playerVelocityY = jumpVelocity; // Apply upward velocity
+        }
+
+        // Restore the area where the player was previously drawn
+        Renderer::RestoreArea(prevPlayerX, prevPlayerY, playerWidth, playerHeight, preRenderedLevel, 1280, 720);
+
+        // Update animations
+        player.Update(static_cast<float>(fixedDeltaTime));
         if (isMoving && !wasMoving) {
-            player.PlayAnimation("run"); // Switch to running animation
+            player.PlayAnimation("run");
         }
         else if (!isMoving && wasMoving) {
-            player.PlayAnimation("idle"); // Switch back to idle animation
+            player.PlayAnimation("idle");
         }
 
-        player.Update(static_cast<float>(deltaTime));
-
         // Draw the player sprite at the current position
-        bool flipHorizontal = isFacingLeft; // Flip if moving left
+        bool flipHorizontal = isFacingLeft;
         player.Render(playerX, playerY, Renderer::GetFramebuffer(), 1280, 720, flipHorizontal);
-
-        // Update the player's previous position
-        prevPlayerX = playerX;
 
         // Present the rendered frame to the screen
         Renderer::Present();
 
+        // Update the player's previous position
+        prevPlayerX = playerX;
+        prevPlayerY = playerY;
+
         lastFrameTime = currentTime;
-
-        // FPS calculation
-        /*auto currentTime = std::chrono::high_resolution_clock::now();
-        double deltaTime = std::chrono::duration<double>(currentTime - lastFrameTime).count();
-        frameCount++;
-        if (deltaTime >= 1.0) { // Calculate FPS every second
-            fps = frameCount / deltaTime;
-            frameCount = 0;
-            lastFrameTime = currentTime;
-
-            // Debug output: RAM, FPS, and CPU usage
-            double ramUsage = GetMemoryUsage();
-            double cpuUsage = GetCPUUsage();
-            std::cout << "RAM: " << ramUsage << " MB, "
-                << "FPS: " << fps << ", "
-                << "CPU Usage: " << cpuUsage << "%\n";
-        }*/
     }
 
     // Clean up resources and shut down the renderer
     Renderer::Shutdown();
-    return 0; // Return 0 to indicate successful execution
+    return 0;
 }

@@ -1,18 +1,29 @@
 #include "input.hpp"
 #include <Windows.h>
 #include <unordered_map>
+#include <iostream>
 
-namespace Input {
-    static std::unordered_map<Key, bool> keyState; // Static map to store the state of keys (pressed or not)
+static std::unordered_map<int, bool> previousKeyStates;
 
-    void Update() {
-        // Update the state of the key based on its current status
-        keyState[Key::Escape] = GetAsyncKeyState(VK_ESCAPE) & 0x8000;
-        keyState[Key::Left] = GetAsyncKeyState(VK_LEFT) & 0x8000;
-        keyState[Key::Right] = GetAsyncKeyState(VK_RIGHT) & 0x8000;
+void Input::Update() {
+    // Update previous states after checking the current state
+    for (int i = 0; i < 256; ++i) { 
+        bool currentState = GetAsyncKeyState(i) & 0x8000;
+        if (previousKeyStates.find(i) == previousKeyStates.end()) {
+            previousKeyStates[i] = false; // Initialize if not already present
+        }
+        previousKeyStates[i] = currentState;
     }
+}
 
-    bool IsKeyPressed(Key key) {
-        return keyState[key]; // Return the state of the specified key
+bool Input::IsKeyPressed(Key key) {
+    int vkCode = 0;
+    switch (key) {
+    case Key::Left: vkCode = VK_LEFT; break;
+    case Key::Right: vkCode = VK_RIGHT; break;
+    case Key::Escape: vkCode = VK_ESCAPE; break;
+    case Key::Space: vkCode = VK_SPACE; break;
+    default: return false;
     }
+    return GetAsyncKeyState(vkCode) & 0x8000;
 }

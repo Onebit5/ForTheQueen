@@ -113,19 +113,17 @@ namespace Renderer {
         return framebuffer; // Return a reference to the framebuffer
     }
 
-    void Renderer::RestoreArea(int x, int y, int width, int height, const std::vector<unsigned char>& source, int screenWidth, int screenHeight) {
-        for (int py = 0; py < height; ++py) {
-            for (int px = 0; px < width; ++px) {
-                int srcIndex = ((y + py) * screenWidth + (x + px)) * 4; // Index in the source buffer
-                int dstIndex = ((y + py) * screenWidth + (x + px)) * 4; // Index in the framebuffer
-
-                // Validate bounds
-                if (x + px < 0 || x + px >= screenWidth || y + py < 0 || y + py >= screenHeight) continue;
-
-                framebuffer[dstIndex + 0] = source[srcIndex + 0]; // Red
-                framebuffer[dstIndex + 1] = source[srcIndex + 1]; // Green
-                framebuffer[dstIndex + 2] = source[srcIndex + 2]; // Blue
-                framebuffer[dstIndex + 3] = source[srcIndex + 3]; // Alpha
+    void Renderer::RestoreArea(int x, int y, int width, int height, const std::vector<unsigned char>& preRenderedLevel, int screenWidth, int screenHeight) {
+        for (int py = y; py < y + height; ++py) {
+            for (int px = x; px < x + width; ++px) {
+                if (px >= 0 && px < screenWidth && py >= 0 && py < screenHeight) {
+                    int index = (py * screenWidth + px) * 4; // RGBA format
+                    int preRenderedIndex = (py * screenWidth + px) * 4;
+                    framebuffer[index] = preRenderedLevel[preRenderedIndex]; // Red
+                    framebuffer[index + 1] = preRenderedLevel[preRenderedIndex + 1]; // Green
+                    framebuffer[index + 2] = preRenderedLevel[preRenderedIndex + 2]; // Blue
+                    framebuffer[index + 3] = preRenderedLevel[preRenderedIndex + 3]; // Alpha
+                }
             }
         }
     }
