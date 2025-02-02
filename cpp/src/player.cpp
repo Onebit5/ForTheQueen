@@ -3,17 +3,16 @@
 #include <iostream>
 
 // Function to generate frames automatically
-std::vector<Player::Frame> GenerateFrames(int spriteWidth, int spriteHeight, int frameWidth, int frameHeight) {
+std::vector<Player::Frame> GenerateFrames(int spriteWidth, int spriteHeight, int frameWidth, int frameHeight, float defaultDuration) {
     std::vector<Player::Frame> frames;
     int columns = spriteWidth / frameWidth;
     int rows = spriteHeight / frameHeight;
 
     for (int row = 0; row < rows; ++row) {
         for (int col = 0; col < columns; ++col) {
-            frames.push_back({ col * frameWidth, row * frameHeight, frameWidth, frameHeight });
+            frames.push_back({ col * frameWidth, row * frameHeight, frameWidth, frameHeight, defaultDuration });
         }
     }
-
     return frames;
 }
 
@@ -50,6 +49,7 @@ void Player::PlayAnimation(const std::string& name) {
         currentAnimation = name;
         currentFrames = animations[name];
         currentFrameIndex = 0; // Reset to the first frame
+        frameTimer = 0.0f;     // Reset the frame timer
     }
     else {
         std::cerr << "ERROR: Animation not found: " << name << "\n";
@@ -57,14 +57,18 @@ void Player::PlayAnimation(const std::string& name) {
 }
 
 void Player::Update(float deltaTime) {
-    frameTime += deltaTime;
-    if (frameTime >= frameDuration) {
-        frameTime = 0.0f;
-        currentFrameIndex = (currentFrameIndex + 1) % currentFrames.size(); // Loop through frames
+    if (currentFrames.empty()) return;
+
+    frameTimer += deltaTime;
+
+    // Advance to the next frame if the elapsed time exceeds the current frame's duration
+    while (frameTimer >= currentFrames[currentFrameIndex].duration) {
+        frameTimer -= currentFrames[currentFrameIndex].duration;
+        currentFrameIndex = (currentFrameIndex + 1) % currentFrames.size();
     }
 }
 
-void Player::Render(int x, int y, std::vector<unsigned char>& framebuffer, int screenWidth, int screenHeight, bool flipHorizontal = false) {
+void Player::Render(int x, int y, std::vector<unsigned char>& framebuffer, int screenWidth, int screenHeight, bool flipHorizontal) {
     if (currentFrames.empty()) {
         std::cerr << "ERROR: No frames to render\n";
         return;

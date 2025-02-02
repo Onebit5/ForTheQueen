@@ -7,6 +7,9 @@
 #include <windows.h> 
 #include <psapi.h>   
 
+const float GRAVITY = 800.0f;
+const float JUMP_VELOCITY = -500.0f;
+
 bool isColliding(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2) {
     return !(x1 + width1 <= x2 || x2 + width2 <= x1 || y1 + height1 <= y2 || y2 + height2 <= y1);
 }
@@ -37,7 +40,7 @@ int main() {
         Renderer::Shutdown();
         return 1;
     }
-    std::vector<Player::Frame> idleFrames = GenerateFrames(128, 32, 32, 32);
+    std::vector<Player::Frame> idleFrames = GenerateFrames(128, 32, 32, 32, .9f);
     player.AddAnimation("idle", "idle", idleFrames);
 
     if (!player.LoadSpriteSheet("run", "playerRUN.png", 512, 32)) {
@@ -45,7 +48,7 @@ int main() {
         Renderer::Shutdown();
         return 1;
     }
-    std::vector<Player::Frame> runFrames = GenerateFrames(512, 32, 32, 32);
+    std::vector<Player::Frame> runFrames = GenerateFrames(512, 32, 32, 32, .1f);
     player.AddAnimation("run", "run", runFrames);
 
     player.PlayAnimation("idle");
@@ -59,8 +62,6 @@ int main() {
     int playerX = 375, playerY = 500; // Player's initial position on the screen
     int prevPlayerX = playerX, prevPlayerY = playerY; // Track the player's previous position
     float movementSpeed = 100.0f; // Player's movement speed in pixels per second
-    float gravity = 800.0f; // Stronger gravity for faster descent
-    float jumpVelocity = -400.0f; // Lower initial velocity for a shorter jump
     float playerVelocityY = 0.0f; // Current vertical velocity
     bool isOnGround = false; // Track whether the player is on the ground
 
@@ -76,9 +77,8 @@ int main() {
         // Calculate delta time
         auto currentTime = std::chrono::high_resolution_clock::now();
         double deltaTime = std::chrono::duration<double>(currentTime - lastFrameTime).count();
-
-        // Use a fixed time step for physics
-        const float fixedDeltaTime = 1.0f / 60.0f;
+        const float fixedDeltaTime = 1.0f / 60.0f; // Fixed time step (60 FPS)
+        lastFrameTime = currentTime;
 
         // Check if the Escape key is pressed to exit the game
         if (Input::IsKeyPressed(Input::Key::Escape)) {
@@ -126,7 +126,7 @@ int main() {
         }
 
         // Apply gravity
-        playerVelocityY += gravity * fixedDeltaTime;
+        playerVelocityY += GRAVITY * fixedDeltaTime;
 
         // Calculate the new Y position
         int newY = playerY + static_cast<int>(playerVelocityY * fixedDeltaTime);
@@ -144,14 +144,13 @@ int main() {
             }
         }
 
-        if (!collision) {
-            isOnGround = false; // Player is no longer on the ground
-        }
+        if (!collision) isOnGround = false; // Player is no longer on the ground
         playerY = newY;
 
         // Handle jumping
         if (Input::IsKeyPressed(Input::Key::Space) && isOnGround) {
-            playerVelocityY = jumpVelocity; // Apply upward velocity
+            playerVelocityY = JUMP_VELOCITY; // Apply upward velocity
+            isOnGround = false;
         }
 
         // Restore the area where the player was previously drawn
